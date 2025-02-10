@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.8",
     "@primevue/themes": "^4.2.5",
+    "@types/google.maps": "^3.58.1",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "axios": "^1.7.9",

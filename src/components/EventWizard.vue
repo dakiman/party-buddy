@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Steps from 'primevue/steps'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
+import Stepper from 'primevue/stepper'
+import StepList from 'primevue/steplist'
+import Step from 'primevue/step'
+import StepPanels from 'primevue/steppanels'
+import StepPanel from 'primevue/steppanel'
 import TimeAndPlaceStep from './steps/TimeAndPlaceStep.vue'
+import { useWizardStore } from '@/stores/wizard'
 
 const visible = ref(false)
-const currentStep = ref(0)
 const timeAndPlaceStep = ref()
-
-const items = [
-  { label: 'Time & Place' },
-  { label: 'Details' },
-  { label: 'Review' }
-]
+const wizardStore = useWizardStore()
 
 const show = () => {
   visible.value = true
@@ -21,17 +20,7 @@ const show = () => {
 
 const close = () => {
   visible.value = false
-  currentStep.value = 0
-}
-
-const nextStep = () => {
-  if (currentStep.value === 0) {
-    timeAndPlaceStep.value?.setTouched()
-    if (!timeAndPlaceStep.value?.isValid) {
-      return
-    }
-  }
-  currentStep.value++
+  wizardStore.resetForm()
 }
 
 defineExpose({
@@ -51,48 +40,76 @@ defineExpose({
       <h2 class="wizard-title">Create New Event</h2>
     </template>
 
-    <Steps
-      :model="items"
-      :readonly="false"
-      :class="'wizard-steps'"
-      v-model:activeIndex="currentStep"
-    />
+    <Stepper value="1" linear>
+      <StepList>
+        <Step value="1">Time & Place</Step>
+        <Step value="2">Details</Step>
+        <Step value="3">Review</Step>
+      </StepList>
 
-    <div class="step-content">
-      <TimeAndPlaceStep 
-        v-if="currentStep === 0"
-        ref="timeAndPlaceStep"
-      />
+      <StepPanels>
+        <StepPanel v-slot="{ activateCallback }" value="1">
+          <TimeAndPlaceStep ref="timeAndPlaceStep" />
+          <div class="wizard-actions">
+            <div></div> <!-- Empty div for spacing -->
+            <Button
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              @click="() => {
+                if (timeAndPlaceStep?.isValid) {
+                  activateCallback('2')
+                } else {
+                  timeAndPlaceStep?.setTouched()
+                }
+              }"
+            />
+          </div>
+        </StepPanel>
 
-      <div v-if="currentStep === 1">
-        <h3>Details</h3>
-        <p>Step content coming soon...</p>
-      </div>
-      <div v-if="currentStep === 2">
-        <h3>Review</h3>
-        <p>Step content coming soon...</p>
-      </div>
-    </div>
+        <StepPanel v-slot="{ activateCallback }" value="2">
+          <div class="details-step">
+            <h3>Details</h3>
+            <p>Step content coming soon...</p>
+          </div>
+          <div class="wizard-actions">
+            <Button
+              label="Back"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              @click="() => activateCallback('1')"
+            />
+            <Button
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              @click="() => activateCallback('3')"
+            />
+          </div>
+        </StepPanel>
 
-    <div class="wizard-actions">
-      <Button
-        label="Back"
-        class="p-button-outlined"
-        @click="currentStep--"
-        :disabled="currentStep === 0"
-      />
-      <Button
-        v-if="currentStep < items.length - 1"
-        label="Next"
-        @click="nextStep"
-      />
-      <Button
-        v-else
-        label="Finish"
-        severity="success"
-        @click="close"
-      />
-    </div>
+        <StepPanel v-slot="{ activateCallback }" value="3">
+          <div class="review-step">
+            <h3>Review</h3>
+            <pre>{{ wizardStore.formData }}</pre>
+          </div>
+          <div class="wizard-actions">
+            <Button
+              label="Back"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              @click="() => activateCallback('2')"
+            />
+            <Button
+              label="Finish"
+              severity="success"
+              icon="pi pi-check"
+              @click="close"
+            />
+          </div>
+        </StepPanel>
+      </StepPanels>
+    </Stepper>
   </Dialog>
 </template>
 
@@ -103,21 +120,17 @@ defineExpose({
   font-weight: 600;
 }
 
-:deep(.wizard-steps) {
-  margin: 2rem 0;
-}
-
-.step-content {
-  min-height: 300px;
-  padding: 1rem;
-}
-
 .wizard-actions {
   display: flex;
   justify-content: space-between;
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--surface-border);
+}
+
+.details-step,
+.review-step {
+  min-height: 300px;
 }
 
 :deep(.p-dialog) {
@@ -135,22 +148,6 @@ defineExpose({
 :deep(.p-dialog-content) {
   padding: 0 1.5rem 1.5rem 1.5rem;
   background-color: transparent;
-  color: var(--text-color);
-}
-
-:deep(.p-steps) {
-  background-color: transparent;
-}
-
-:deep(.p-steps-item .p-menuitem-link) {
-  background-color: transparent;
-}
-
-:deep(.p-steps-number) {
-  color: var(--text-color);
-}
-
-:deep(.p-steps-title) {
   color: var(--text-color);
 }
 </style> 

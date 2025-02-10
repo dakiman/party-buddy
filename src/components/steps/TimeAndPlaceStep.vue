@@ -2,17 +2,30 @@
 import { ref, computed } from 'vue'
 import Calendar from 'primevue/calendar'
 import Checkbox from 'primevue/checkbox'
+import GoogleMapPicker from '../GoogleMapPicker.vue'
+import { useWizardStore } from '@/stores/wizard'
 
-const date = ref(null)
-const time = ref(null)
-const includeLocation = ref(false)
+const wizardStore = useWizardStore()
+const includeLocation = ref(!!wizardStore.formData.location)
 const touched = ref(false)
 
-const isValid = computed(() => date.value !== null)
-const showError = computed(() => touched.value && !date.value)
+const isValid = computed(() => wizardStore.formData.date !== null)
+const showError = computed(() => touched.value && !wizardStore.formData.date)
 
 const setTouched = () => {
   touched.value = true
+}
+
+const updateDate = (value: Date | null) => {
+  wizardStore.updateFormData({ date: value })
+}
+
+const updateTime = (value: Date | null) => {
+  wizardStore.updateFormData({ time: value })
+}
+
+const updateLocation = (value: { lat: number; lng: number } | null) => {
+  wizardStore.updateFormData({ location: value })
 }
 
 defineExpose({
@@ -25,28 +38,45 @@ defineExpose({
     <div class="time-place-step">
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
-            <Calendar v-model="date" :minDate="new Date()" :showIcon="true" dateFormat="dd/mm/yy" class="w-full" />
+            <Calendar
+                :modelValue="wizardStore.formData.date"
+                @update:modelValue="updateDate"
+                :minDate="new Date()"
+                :showIcon="true"
+                dateFormat="dd/mm/yy"
+                class="w-full"
+            />
             <small v-if="showError" class="error-text">Date is required</small>
         </div>
 
         <div class="form-field">
             <label>What time?</label>
-            <Calendar v-model="time" showIcon fluid iconDisplay="input" timeOnly>
-                <template #inputicon="slotProps">
-                    <i class="pi pi-clock" @click="slotProps.clickCallback" />
-                </template>
-            </Calendar>
+            <Calendar
+                :modelValue="wizardStore.formData.time"
+                @update:modelValue="updateTime"
+                :timeOnly="true"
+                :showIcon="true"
+                hourFormat="24"
+                class="w-full"
+            />
         </div>
 
         <div class="form-field location-field">
             <div class="location-checkbox">
-                <Checkbox v-model="includeLocation" :binary="true" inputId="location" />
-                <label for="location">Location?</label>
+                <Checkbox
+                    v-model="includeLocation"
+                    :binary="true"
+                    inputId="location"
+                />
+                <label for="location">Share location on map?</label>
             </div>
 
             <transition name="fade">
                 <div v-if="includeLocation" class="location-picker">
-                    Pick location
+                    <GoogleMapPicker
+                        :modelValue="wizardStore.formData.location"
+                        @update:modelValue="updateLocation"
+                    />
                 </div>
             </transition>
         </div>
@@ -72,12 +102,12 @@ defineExpose({
 }
 
 .required {
-    color: var(--red-500);
+    color: #ff4c51;
     margin-left: 0.25rem;
 }
 
 .error-text {
-    color: var(--red-500);
+    color: #ff4c51 !important;
     font-size: 0.875rem;
 }
 
@@ -89,10 +119,6 @@ defineExpose({
 
 .location-picker {
     margin-top: 1rem;
-    padding: 1rem;
-    background: var(--surface-card);
-    border: 1px solid var(--surface-border);
-    border-radius: 6px;
 }
 
 :deep(.p-calendar) {
