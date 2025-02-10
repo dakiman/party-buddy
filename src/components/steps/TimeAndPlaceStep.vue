@@ -13,24 +13,24 @@ const isValid = computed(() => wizardStore.formData.date !== null)
 const showError = computed(() => touched.value && !wizardStore.formData.date)
 
 const setTouched = () => {
-  touched.value = true
+    touched.value = true
 }
 
 const updateDate = (value: Date | null) => {
-  wizardStore.updateFormData({ date: value })
+    wizardStore.updateFormData({ date: value })
 }
 
 const updateTime = (value: Date | null) => {
-  wizardStore.updateFormData({ time: value })
+    wizardStore.updateFormData({ time: value })
 }
 
 const updateLocation = (value: { lat: number; lng: number } | null) => {
-  wizardStore.updateFormData({ location: value })
+    wizardStore.updateFormData({ location: value })
 }
 
 defineExpose({
-  isValid,
-  setTouched
+    isValid,
+    setTouched
 })
 </script>
 
@@ -38,52 +38,38 @@ defineExpose({
     <div class="time-place-step">
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
-            <Calendar
-                :modelValue="wizardStore.formData.date"
-                @update:modelValue="updateDate"
-                :minDate="new Date()"
-                :showIcon="true"
-                dateFormat="dd/mm/yy"
-                class="w-full"
-            />
+            <Calendar :modelValue="wizardStore.formData.date" @update:modelValue="updateDate" :minDate="new Date()"
+                :showIcon="true" dateFormat="dd/mm/yy" class="w-full" />
             <small v-if="showError" class="error-text">Date is required</small>
         </div>
 
         <div class="form-field">
             <label>What time?</label>
-            <Calendar
-                :modelValue="wizardStore.formData.time"
-                @update:modelValue="updateTime"
-                :timeOnly="true"
-                :showIcon="true"
-                hourFormat="24"
-                class="w-full"
-            />
+            <Calendar :modelValue="wizardStore.formData.time" @update:modelValue="updateTime" showIcon fluid
+                iconDisplay="input" timeOnly>
+                <template #inputicon="slotProps">
+                    <i class="pi pi-clock" @click="slotProps.clickCallback" />
+                </template>
+            </Calendar>
+
         </div>
 
         <div class="form-field location-field">
             <div class="location-checkbox">
-                <Checkbox
-                    v-model="includeLocation"
-                    :binary="true"
-                    inputId="location"
-                />
+                <Checkbox v-model="includeLocation" :binary="true" inputId="location" />
                 <label for="location">Share location on map?</label>
             </div>
 
             <transition name="fade">
                 <div v-if="includeLocation" class="location-picker">
-                    <GoogleMapPicker
-                        :modelValue="wizardStore.formData.location"
-                        @update:modelValue="updateLocation"
-                    />
+                    <GoogleMapPicker :modelValue="wizardStore.formData.location" @update:modelValue="updateLocation" />
                 </div>
             </transition>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style>
 .time-place-step {
     display: flex;
     flex-direction: column;
@@ -121,29 +107,28 @@ defineExpose({
     margin-top: 1rem;
 }
 
-:deep(.p-calendar) {
+.p-calendar {
     width: 100%;
 }
 
-:deep(.p-calendar input) {
+.p-calendar input {
     width: 100%;
     background-color: transparent;
     border: 1px solid var(--surface-border);
     color: var(--text-color);
 }
 
-:deep(.p-calendar .p-button) {
+.p-calendar .p-button {
     background-color: transparent;
     border: 1px solid var(--surface-border);
     color: var(--text-color);
 }
 
-:deep(.p-checkbox .p-checkbox-box) {
-    background-color: transparent;
+.p-checkbox .p-checkbox-box {
     border: 1px solid var(--surface-border);
 }
 
-:deep(.p-checkbox .p-checkbox-box.p-highlight) {
+.p-checkbox .p-checkbox-box.p-highlight {
     background-color: #7B7EF6;
     border-color: #7B7EF6;
 }

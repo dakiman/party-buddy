@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
+import Tag from 'primevue/tag'
 import { useWizardStore } from '@/stores/wizard'
 import { searchArtists } from '@/services/music'
 import type { Artist } from '@/stores/wizard'
@@ -11,216 +12,200 @@ const selectedArtists = ref<Artist[]>([])
 const loading = ref(false)
 
 const search = async (event: { query: string }) => {
-  try {
-    loading.value = true
-    const artists = await searchArtists(event.query)
-    
-    // Filter out already selected artists
-    const existingIds = selectedArtists.value.map(artist => artist.id)
-    searchResults.value = artists.filter(
-      artist => !existingIds.includes(artist.id)
-    )
-  } catch (error) {
-    console.error('Error searching artists:', error)
-    searchResults.value = []
-  } finally {
-    loading.value = false
-  }
+    try {
+        loading.value = true
+        const artists = await searchArtists(event.query)
+
+        // Filter out already selected artists
+        const existingIds = selectedArtists.value.map(artist => artist.id)
+        searchResults.value = artists.filter(
+            artist => !existingIds.includes(artist.id)
+        )
+    } catch (error) {
+        console.error('Error searching artists:', error)
+        searchResults.value = []
+    } finally {
+        loading.value = false
+    }
 }
 
 const removeArtist = (artist: Artist) => {
-  selectedArtists.value = selectedArtists.value.filter(a => a.id !== artist.id)
+    selectedArtists.value = selectedArtists.value.filter(a => a.id !== artist.id)
 }
 
 // Update store when selection changes
 watch(selectedArtists, (newValue) => {
-  wizardStore.updateFormData({ artists: newValue })
+    wizardStore.updateFormData({ artists: newValue })
 }, { deep: true })
 </script>
 
 <template>
-  <div class="music-step">
-    <h3 class="text-xl mb-4">Add some music</h3>
-    <div class="form-field">
-      <label>Search for artists</label>
-      <AutoComplete
-        v-model="selectedArtists"
-        :suggestions="searchResults"
-        @complete="search"
-        :multiple="true"
-        :delay="300"
-        :loading="loading"
-        optionLabel="name"
-        placeholder="Type to search artists..."
-        class="w-full"
-      >
-        <template #option="slotProps">
-          <div class="artist-option">
-            <div class="artist-info">
-              <img 
-                :src="slotProps.option.images[2]?.url" 
-                class="artist-image"
-                :alt="slotProps.option.name"
-              />
-              <span class="artist-name">{{ slotProps.option.name }}</span>
-            </div>
-            <div class="genre-pills">
-              <span 
-                v-for="genre in slotProps.option.genres.slice(0, 2)" 
-                :key="genre" 
-                class="genre-pill"
-              >
-                {{ genre }}
-              </span>
-            </div>
-          </div>
-        </template>
-        
-        <template #chip="slotProps">
-          <div class="artist-chip">
-            <img 
-              :src="slotProps.value.images[2]?.url" 
-              class="chip-image"
-              :alt="slotProps.value.name"
-            />
-            <span>{{ slotProps.value.name }}</span>
-            <i 
-              class="pi pi-times remove-icon" 
-              @click.stop="removeArtist(slotProps.value)"
-            />
-          </div>
-        </template>
-      </AutoComplete>
+    <div class="music-step">
+        <h3 class="text-xl mb-4">Add some music</h3>
+        <div class="form-field">
+            <label>Search for artists</label>
+            <AutoComplete v-model="selectedArtists" :suggestions="searchResults" @complete="search" :multiple="true"
+                :delay="300" :loading="loading" optionLabel="name" placeholder="Type to search artists..."
+                class="w-full">
+                <template #option="slotProps">
+                    <div class="artist-option">
+                        <div class="artist-info">
+                            <img :src="slotProps.option.images[2]?.url" class="artist-image"
+                                :alt="slotProps.option.name" />
+                            <span class="artist-name">{{ slotProps.option.name }}</span>
+                        </div>
+                        <div class="genre-pills">
+                            <Tag v-for="genre in slotProps.option.genres.slice(0, 2)" :key="genre" :value="genre">
+                                {{ genre }}
+                            </Tag>
+                        </div>
+                    </div>
+                </template>
+
+                <template #chip="slotProps">
+                    <div class="artist-chip">
+                        <img :src="slotProps.value.images[2]?.url" class="chip-image" :alt="slotProps.value.name" />
+                        <span>{{ slotProps.value.name }}</span>
+                        <i class="pi pi-times remove-icon" @click.stop="removeArtist(slotProps.value)" />
+                    </div>
+                </template>
+            </AutoComplete>
+        </div>
     </div>
-  </div>
 </template>
 
-<style scoped>
+<style>
 .music-step {
-  min-height: 300px;
+    min-height: 300px;
 }
 
 .form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .form-field label {
-  font-weight: 500;
-  color: var(--text-color);
+    font-weight: 500;
+    color: var(--text-color);
 }
 
 .artist-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    width: 100%;
 }
 
 .artist-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .artist-image {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  object-fit: cover;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .artist-name {
-  font-size: 0.875rem;
-  font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 .genre-pills {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
 }
 
 .genre-pill {
-  background-color: var(--primary-color);
-  color: var(--primary-color-text);
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
 }
 
 .artist-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.125rem 0.5rem 0.125rem 0.125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.125rem;
+    background-color: var(--p-primary-color);
+    color: var(--primary-color-text);
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
 }
 
 .chip-image {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  object-fit: cover;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .remove-icon {
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 0.25rem;
-  margin-left: 0.25rem;
-  color: var(--primary-color-text);
-  opacity: 0.7;
-  transition: opacity 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.25rem;
+    margin-left: 0.25rem;
+    color: var(--primary-color-text);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .remove-icon:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
-:deep(.p-autocomplete) {
-  width: 100%;
+.p-autocomplete {
+    width: 100%;
 }
 
-:deep(.p-autocomplete-input) {
-  width: 100%;
-  background-color: transparent;
-  border: 1px solid var(--surface-border);
-  color: var(--text-color);
+.p-autocomplete-input {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--surface-border);
+    color: var(--text-color);
 }
 
-:deep(.p-autocomplete-panel) {
-  background-color: var(--surface-overlay);
-  border: 1px solid var(--surface-border);
-  color: var(--text-color);
+.p-autocomplete-panel {
+    background-color: var(--surface-overlay);
+    border: 1px solid var(--surface-border);
+    color: var(--text-color);
 }
 
-:deep(.p-autocomplete-items) {
-  padding: 0.5rem;
+.p-autocomplete-items {
+    padding: 0.5rem;
 }
 
-:deep(.p-autocomplete-item) {
-  padding: 0;
-  border-radius: 6px;
+.p-autocomplete-item {
+    padding: 0;
+    border-radius: 6px;
 }
 
-:deep(.p-autocomplete-item:hover) {
-  background-color: var(--surface-hover);
+.p-autocomplete-item:hover {
+    background-color: var(--surface-hover);
 }
 
-:deep(.p-autocomplete-token) {
-  background-color: var(--primary-color);
-  border-radius: 4px;
-  margin: 2px;
-  padding: 0;
+.p-autocomplete-token {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+    margin: 2px;
+    padding: 0;
 }
 
-:deep(.p-autocomplete-token-icon) {
-  display: none;
+.p-autocomplete-token-icon {
+    display: none;
 }
-</style> 
+
+</style>

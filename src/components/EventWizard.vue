@@ -41,7 +41,7 @@ defineExpose({
       <h2 class="wizard-title">Create New Event</h2>
     </template>
 
-    <Stepper value="1" linear>
+    <Stepper value="1" linear id="stepper">
       <StepList>
         <Step value="1">Time & Place</Step>
         <Step value="2">Music</Step>
@@ -111,7 +111,7 @@ defineExpose({
   </Dialog>
 </template>
 
-<style scoped>
+<style>
 .wizard-title {
   margin: 0;
   font-size: 1.5rem;
@@ -131,20 +131,19 @@ defineExpose({
   min-height: 300px;
 }
 
-:deep(.p-dialog) {
-  background-color: #1E1E1E;
+.p-dialog {
   border-radius: 8px;
 }
 
-:deep(.p-dialog-header) {
+.p-dialog-header {
   padding: 1.5rem;
   background-color: transparent;
   border-bottom: 1px solid var(--surface-border);
   color: var(--text-color);
 }
 
-:deep(.p-dialog-content) {
-  padding: 0 1.5rem 1.5rem 1.5rem;
+.p-dialog-content {
+  padding: 15px;
   background-color: transparent;
   color: var(--text-color);
 }

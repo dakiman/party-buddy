@@ -29,21 +29,6 @@ onMounted(async () => {
     map.value = new google.maps.Map(mapDiv.value!, {
       center: props.modelValue || defaultCenter,
       zoom: 13,
-      styles: [
-        {
-          "elementType": "geometry",
-          "stylers": [{ "color": "#242f3e" }]
-        },
-        {
-          "elementType": "labels.text.stroke",
-          "stylers": [{ "color": "#242f3e" }]
-        },
-        {
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#746855" }]
-        },
-        // Add more styles as needed for dark theme
-      ]
     })
 
     // If we have an initial location, show the marker

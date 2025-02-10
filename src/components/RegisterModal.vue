@@ -132,7 +132,7 @@ defineExpose({
   </Dialog>
 </template>
 
-<style scoped>
+<style>
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -146,8 +146,8 @@ defineExpose({
   gap: 0.5rem;
 }
 
-:deep(.p-password input),
-:deep(.p-inputtext) {
+.p-password input,
+.p-inputtext {
   width: 100%;
   background-color: transparent;
   border: 1px solid var(--surface-border);
@@ -155,11 +155,11 @@ defineExpose({
   padding: 0.75rem;
 }
 
-:deep(.p-password-input) {
+.p-password-input {
   background-color: transparent !important;
 }
 
-:deep(.p-password i) {
+.p-password i {
   color: var(--text-color);
 }
 
@@ -174,13 +174,13 @@ defineExpose({
   background-color: #6366F1;
 }
 
-:deep(.p-dialog) {
+.p-dialog {
   background-color: #1E1E1E;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-:deep(.p-dialog-header) {
+.p-dialog-header {
   padding: 1.5rem;
   background-color: transparent;
   border-bottom: none;
@@ -188,20 +188,20 @@ defineExpose({
   font-family: 'Outfit', sans-serif;
 }
 
-:deep(.p-dialog-content) {
+.p-dialog-content {
   padding: 0 1.5rem 1.5rem 1.5rem;
   background-color: transparent;
 }
 
-:deep(.p-dialog-header-close) {
+.p-dialog-header-close {
   color: var(--text-color);
 }
 
-:deep(.p-dialog-header-close:hover) {
+.p-dialog-header-close:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-:deep(.p-error) {
+.p-error {
   color: #ef4444;
   font-size: 0.875rem;
 }

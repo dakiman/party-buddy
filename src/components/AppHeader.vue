@@ -118,7 +118,7 @@ function showRegister() {
   <RegisterModal ref="registerModal" />
 </template>
 
-<style scoped>
+<style>
 .app-header {
   width: 100%;
   background: var(--surface-card);
@@ -167,7 +167,7 @@ function showRegister() {
   background-color: var(--surface-hover);
 }
 
-:deep(.user-menu) {
+.user-menu {
   background-color: #1E1E1E;
   border: 1px solid var(--surface-border);
   border-radius: 6px;
@@ -176,26 +176,26 @@ function showRegister() {
   z-index: 1000;
 }
 
-:deep(.user-menu .p-menuitem-link) {
+.user-menu .p-menuitem-link {
   padding: 0.75rem 1rem;
   color: var(--text-color);
   border-radius: 4px;
 }
 
-:deep(.user-menu .p-menuitem-link:hover) {
+.user-menu .p-menuitem-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-:deep(.user-menu .p-menuitem-icon) {
+.user-menu .p-menuitem-icon {
   color: var(--text-color);
   margin-right: 0.75rem;
 }
 
-:deep(.user-menu .p-menuitem-text) {
+.user-menu .p-menuitem-text {
   color: var(--text-color);
 }
 
-:deep(.user-menu .p-separator) {
+.user-menu .p-separator {
   border-top: 1px solid var(--surface-border);
   margin: 0.5rem 0;
 }
