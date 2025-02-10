@@ -12,8 +12,9 @@ import AppHeader from '@/components/AppHeader.vue'
 </template>
 
 <style>
+
 * {
-  font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif !important;
+  font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }

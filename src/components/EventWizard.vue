@@ -8,6 +8,7 @@ import Step from 'primevue/step'
 import StepPanels from 'primevue/steppanels'
 import StepPanel from 'primevue/steppanel'
 import TimeAndPlaceStep from './steps/TimeAndPlaceStep.vue'
+import MusicStep from './steps/MusicStep.vue'
 import { useWizardStore } from '@/stores/wizard'
 
 const visible = ref(false)
@@ -43,7 +44,7 @@ defineExpose({
     <Stepper value="1" linear>
       <StepList>
         <Step value="1">Time & Place</Step>
-        <Step value="2">Details</Step>
+        <Step value="2">Music</Step>
         <Step value="3">Review</Step>
       </StepList>
 
@@ -68,10 +69,7 @@ defineExpose({
         </StepPanel>
 
         <StepPanel v-slot="{ activateCallback }" value="2">
-          <div class="details-step">
-            <h3>Details</h3>
-            <p>Step content coming soon...</p>
-          </div>
+          <MusicStep />
           <div class="wizard-actions">
             <Button
               label="Back"
