@@ -39,14 +39,14 @@ defineExpose({
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
             <Calendar :modelValue="wizardStore.formData.date" @update:modelValue="updateDate" :minDate="new Date()"
-                :showIcon="true" dateFormat="dd/mm/yy" class="w-full" />
+                :showIcon="true" dateFormat="dd/mm/yy" />
             <small v-if="showError" class="error-text">Date is required</small>
         </div>
 
         <div class="form-field">
             <label>What time?</label>
             <Calendar :modelValue="wizardStore.formData.time" @update:modelValue="updateTime" showIcon fluid
-                iconDisplay="input" timeOnly>
+                iconDisplay="input" timeOnly :stepMinute="15" :defaultTime="{ hours: 12, minutes: 0 }">
                 <template #inputicon="slotProps">
                     <i class="pi pi-clock" @click="slotProps.clickCallback" />
                 </template>
