@@ -9,6 +9,8 @@ import StepPanels from 'primevue/steppanels'
 import StepPanel from 'primevue/steppanel'
 import TimeAndPlaceStep from './steps/TimeAndPlaceStep.vue'
 import MusicStep from './steps/MusicStep.vue'
+import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
+import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
 
 const visible = ref(false)
@@ -45,7 +47,8 @@ defineExpose({
       <StepList>
         <Step value="1">Time & Place</Step>
         <Step value="2">Music</Step>
-        <Step value="3">Review</Step>
+        <Step value="3">Drinks & Food</Step>
+        <Step value="4">Review</Step>
       </StepList>
 
       <StepPanels>
@@ -87,16 +90,31 @@ defineExpose({
         </StepPanel>
 
         <StepPanel v-slot="{ activateCallback }" value="3">
-          <div class="review-step">
-            <h3>Review</h3>
-            <pre>{{ wizardStore.formData }}</pre>
-          </div>
+          <DrinksAndFoodStep />
           <div class="wizard-actions">
             <Button
               label="Back"
               severity="secondary"
               icon="pi pi-arrow-left"
               @click="() => activateCallback('2')"
+            />
+            <Button
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              @click="() => activateCallback('4')"
+            />
+          </div>
+        </StepPanel>
+
+        <StepPanel v-slot="{ activateCallback }" value="4">
+          <ReviewStep />
+          <div class="wizard-actions">
+            <Button
+              label="Back"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              @click="() => activateCallback('3')"
             />
             <Button
               label="Finish"
@@ -123,7 +141,7 @@ defineExpose({
   justify-content: space-between;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--p-surface-border);
 }
 
 .details-step,
@@ -146,5 +164,61 @@ defineExpose({
   padding: 15px;
   background-color: transparent;
   color: var(--text-color);
+}
+
+.review-step {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-section h4 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--p-text-color);
+  margin-bottom: 0.5rem;
+}
+
+.review-field {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.review-field label {
+  font-weight: 500;
+  color: var(--p-text-color);
+  min-width: 120px;
+}
+
+.review-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.review-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--p-primary-color);
+  color: var(--primary-color-text);
+  border-radius: 1rem;
+  font-size: 0.875rem;
+}
+
+.review-chip .chip-image {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  object-fit: cover;
 }
 </style> 

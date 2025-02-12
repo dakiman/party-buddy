@@ -15,12 +15,18 @@ export interface Artist {
   spotifyUrl: string
 }
 
+interface DrinkData {
+  id: string
+  name: string
+}
+
 export interface WizardData {
   date: Date | null
   time: Date | null
   location: { lat: number; lng: number } | null
   artists: Artist[]
-  // We can easily add more fields here as we add more steps
+  drinks: DrinkData[]
+  food: string[]
 }
 
 export const useWizardStore = defineStore('wizard', () => {
@@ -28,7 +34,9 @@ export const useWizardStore = defineStore('wizard', () => {
     date: null,
     time: null,
     location: null,
-    artists: []
+    artists: [],
+    drinks: [],
+    food: []
   })
 
   const resetForm = () => {
@@ -36,7 +44,9 @@ export const useWizardStore = defineStore('wizard', () => {
       date: null,
       time: null,
       location: null,
-      artists: []
+      artists: [],
+      drinks: [],
+      food: []
     }
   }
 

@@ -25,14 +25,14 @@ const handleContinue = () => {
         :class="{ selected: selectedType === 'party' }"
         @click="selectType('party')"
       >
-        Party/Hangout
+        Private Party
       </Button>
       <Button
         class="type-button"
         :class="{ selected: selectedType === 'event' }"
         @click="selectType('event')"
       >
-        Event
+        Public Event
       </Button>
     </div>
 

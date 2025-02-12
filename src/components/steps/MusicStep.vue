@@ -87,7 +87,7 @@ watch(selectedArtists, (newValue) => {
 
 .form-field label {
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--p-text-color);
 }
 
 .artist-option {
@@ -174,14 +174,14 @@ watch(selectedArtists, (newValue) => {
 .p-autocomplete-input {
     width: 100%;
     background-color: transparent;
-    border: 1px solid var(--surface-border);
-    color: var(--text-color);
+    border: 1px solid var(--p-surface-border);
+    color: var(--p-text-color);
 }
 
 .p-autocomplete-panel {
-    background-color: var(--surface-overlay);
-    border: 1px solid var(--surface-border);
-    color: var(--text-color);
+    background-color: var(--p-surface-overlay);
+    border: 1px solid var(--p-surface-border);
+    color: var(--p-text-color);
 }
 
 .p-autocomplete-items {
@@ -194,7 +194,7 @@ watch(selectedArtists, (newValue) => {
 }
 
 .p-autocomplete-item:hover {
-    background-color: var(--surface-hover);
+    background-color: var(--p-surface-hover);
 }
 
 .p-autocomplete-token {
@@ -208,4 +208,28 @@ watch(selectedArtists, (newValue) => {
     display: none;
 }
 
+.p-password input,
+.p-inputtext {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--p-surface-border);
+    color: var(--p-text-color);
+    padding: 0.75rem;
+}
+
+.p-password i {
+    color: var(--p-text-color);
+}
+
+.p-dialog-header {
+    padding: 1.5rem;
+    background-color: transparent;
+    border-bottom: none;
+    color: var(--p-text-color);
+    font-family: 'Outfit', sans-serif;
+}
+
+.p-dialog-header-close {
+    color: var(--p-text-color);
+}
 </style>
