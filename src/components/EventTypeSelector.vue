@@ -2,14 +2,17 @@
 import { ref, computed } from 'vue'
 import Button from 'primevue/button'
 import EventWizard from './EventWizard.vue'
+import { useWizardStore } from '../stores/wizard'
 
-const selectedType = ref<'party' | 'event' | null>(null)
+const selectedType = ref<'private' | 'public' | null>(null)
 const eventWizard = ref()
+const wizardStore = useWizardStore()
 
 const showContinueButton = computed(() => selectedType.value !== null)
 
-const selectType = (type: 'party' | 'event') => {
+const selectType = (type: 'private' | 'public') => {
   selectedType.value = type
+  wizardStore.updateFormData({ isPrivate: type === 'private' })
 }
 
 const handleContinue = () => {
@@ -22,15 +25,15 @@ const handleContinue = () => {
     <div class="type-buttons">
       <Button
         class="type-button"
-        :class="{ selected: selectedType === 'party' }"
-        @click="selectType('party')"
+        :class="{ selected: selectedType === 'private' }"
+        @click="selectType('private')"
       >
         Private Party
       </Button>
       <Button
         class="type-button"
-        :class="{ selected: selectedType === 'event' }"
-        @click="selectType('event')"
+        :class="{ selected: selectedType === 'public' }"
+        @click="selectType('public')"
       >
         Public Event
       </Button>

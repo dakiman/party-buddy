@@ -29,6 +29,7 @@ export interface WizardData {
   drinks: DrinkData[]
   food: string[]
   locationDescription?: string
+  isPrivate: boolean
 }
 
 export const useWizardStore = defineStore('wizard', () => {
@@ -40,7 +41,8 @@ export const useWizardStore = defineStore('wizard', () => {
     artists: [],
     drinks: [],
     food: [],
-    locationDescription: ''
+    locationDescription: '',
+    isPrivate: true // default to private
   })
 
   const resetForm = () => {
@@ -52,7 +54,8 @@ export const useWizardStore = defineStore('wizard', () => {
       artists: [],
       drinks: [],
       food: [],
-      locationDescription: ''
+      locationDescription: '',
+      isPrivate: true
     }
   }
 

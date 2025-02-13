@@ -9,6 +9,14 @@ const wizardStore = useWizardStore()
     <h3 class="text-xl mb-4">Review your event details</h3>
     
     <div class="review-section">
+      <h4>Event Type</h4>
+      <div class="review-field">
+        <label>Type:</label>
+        <span>{{ wizardStore.formData.isPrivate ? 'Private Party' : 'Public Event' }}</span>
+      </div>
+    </div>
+
+    <div class="review-section">
       <h4>Time & Place</h4>
       <div class="review-field" v-if="wizardStore.formData.date">
         <label>Date:</label>

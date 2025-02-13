@@ -12,7 +12,7 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
-import { createParty } from '@/services/api'
+import { createEvent } from '@/services/api'
 import { useToast } from 'primevue/usetoast'
 
 const visible = ref(false)
@@ -35,8 +35,9 @@ const handleFinish = async () => {
     loading.value = true
     
     // Format the data according to the API requirements
-    const partyData = {
+    const eventData = {
       name: "My Party", // You might want to make this dynamic
+      isPrivate: wizardStore.formData.isPrivate,
       date: wizardStore.formData.date?.toISOString().split('T')[0],
       time: wizardStore.formData.time?.toLocaleTimeString('en-US', { 
         hour12: false,
@@ -60,7 +61,7 @@ const handleFinish = async () => {
       food: wizardStore.formData.food
     }
 
-    await createParty(partyData)
+    await createEvent(eventData)
     toast.add({
       severity: 'success',
       summary: 'Event Created!',
@@ -72,7 +73,7 @@ const handleFinish = async () => {
     toast.add({
       severity: 'error',
       summary: 'Creation Failed',
-      detail: 'Unable to create Party currently. Please try again later.',
+      detail: 'Unable to create Event currently. Please try again later.',
       life: 5000
     })
   } finally {

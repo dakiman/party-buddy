@@ -29,7 +29,7 @@ api.interceptors.response.use(
 
 export default api
 
-export async function createParty(partyData: any) {
-  const response = await api.post('/parties', partyData)
+export async function createEvent(eventData: any) {
+  const response = await api.post('/events', eventData)
   return response.data
 }
