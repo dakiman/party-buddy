@@ -21,6 +21,7 @@ interface DrinkData {
 }
 
 export interface WizardData {
+  name: string
   date: Date | null
   time: Date | null
   location: { lat: number; lng: number } | null
@@ -32,6 +33,7 @@ export interface WizardData {
 
 export const useWizardStore = defineStore('wizard', () => {
   const formData = ref<WizardData>({
+    name: '',
     date: null,
     time: null,
     location: null,
@@ -43,6 +45,7 @@ export const useWizardStore = defineStore('wizard', () => {
 
   const resetForm = () => {
     formData.value = {
+      name: '',
       date: null,
       time: null,
       location: null,

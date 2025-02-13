@@ -12,10 +12,14 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
+import { createParty } from '@/services/api'
+import { useToast } from 'primevue/usetoast'
 
 const visible = ref(false)
 const timeAndPlaceStep = ref()
 const wizardStore = useWizardStore()
+const toast = useToast()
+const loading = ref(false)
 
 const show = () => {
   visible.value = true
@@ -24,6 +28,56 @@ const show = () => {
 const close = () => {
   visible.value = false
   wizardStore.resetForm()
+}
+
+const handleFinish = async () => {
+  try {
+    loading.value = true
+    
+    // Format the data according to the API requirements
+    const partyData = {
+      name: "My Party", // You might want to make this dynamic
+      date: wizardStore.formData.date?.toISOString().split('T')[0],
+      time: wizardStore.formData.time?.toLocaleTimeString('en-US', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }),
+      location: wizardStore.formData.location ? {
+        lat: wizardStore.formData.location.lat,
+        lng: wizardStore.formData.location.lng,
+        locationDescription: wizardStore.formData.locationDescription
+      } : null,
+      artists: wizardStore.formData.artists.map(artist => ({
+        id: artist.id,
+        name: artist.name,
+        images: artist.images,
+        genres: artist.genres,
+        spotifyUrl: artist.spotifyUrl
+      })),
+      drinks: wizardStore.formData.drinks.map(drink => drink.id),
+      food: wizardStore.formData.food
+    }
+
+    await createParty(partyData)
+    toast.add({
+      severity: 'success',
+      summary: 'Event Created!',
+      detail: 'Your event has been created successfully.',
+      life: 3000
+    })
+    close()
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Creation Failed',
+      detail: 'Unable to create Party currently. Please try again later.',
+      life: 5000
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 defineExpose({
@@ -120,7 +174,8 @@ defineExpose({
               label="Finish"
               severity="success"
               icon="pi pi-check"
-              @click="close"
+              :loading="loading"
+              @click="handleFinish"
             />
           </div>
         </StepPanel>
