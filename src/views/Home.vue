@@ -10,7 +10,7 @@ import EventTypeSelector from '@/components/EventTypeSelector.vue'
   </div>
 </template>
 
-<style scoped>
+<style>
 .home {
   text-align: center;
   padding: 2rem;
@@ -28,4 +28,13 @@ import EventTypeSelector from '@/components/EventTypeSelector.vue'
   color: var(--text-secondary-color);
   margin-bottom: 2rem;
 }
+
+button.p-button:hover {
+  color: white !important;
+}
+
+button.p-button {
+  color: white !important;
+}
+
 </style>

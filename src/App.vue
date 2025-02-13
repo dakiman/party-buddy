@@ -15,7 +15,7 @@ import AppHeader from '@/components/AppHeader.vue'
 
 * {
   font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* line-height: 1.5; */
   font-weight: 400;
 }
 
@@ -24,4 +24,5 @@ import AppHeader from '@/components/AppHeader.vue'
   max-width: 1200px;
   margin: 0 auto;
 }
+
 </style>

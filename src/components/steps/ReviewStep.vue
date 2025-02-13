@@ -18,9 +18,12 @@ const wizardStore = useWizardStore()
         <label>Time:</label>
         <span>{{ new Date(wizardStore.formData.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</span>
       </div>
-      <div class="review-field" v-if="wizardStore.formData.location">
+      <div class="review-field" v-if="wizardStore.formData.location || wizardStore.formData.locationDescription">
         <label>Location:</label>
-        <span>{{ wizardStore.formData.location.lat.toFixed(6) }}, {{ wizardStore.formData.location.lng.toFixed(6) }}</span>
+        <div class="location-info">
+          <span v-if="wizardStore.formData.locationDescription">{{ wizardStore.formData.locationDescription }}</span>
+          <span v-if="wizardStore.formData.location">{{ wizardStore.formData.location.lat.toFixed(6) }}, {{ wizardStore.formData.location.lng.toFixed(6) }}</span>
+        </div>
       </div>
     </div>
 
@@ -116,5 +119,11 @@ const wizardStore = useWizardStore()
   height: 1.25rem;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.location-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style> 
