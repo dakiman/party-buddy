@@ -7,7 +7,6 @@ const api = axios.create({
   }
 })
 
-// Add request interceptor for auth
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -28,8 +27,3 @@ api.interceptors.response.use(
 )
 
 export default api
-
-export async function createEvent(eventData: any) {
-  const response = await api.post('/events', eventData)
-  return response.data
-}

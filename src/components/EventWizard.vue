@@ -12,7 +12,7 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
-import { createEvent } from '@/services/api'
+import { createEvent } from '@/services/event'
 import { useToast } from 'primevue/usetoast'
 
 const visible = ref(false)
