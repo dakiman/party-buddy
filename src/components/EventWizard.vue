@@ -14,12 +14,14 @@ import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
 import { createEvent } from '@/services/event'
 import { useToast } from 'primevue/usetoast'
+import { useRouter } from 'vue-router'
 
 const visible = ref(false)
 const timeAndPlaceStep = ref()
 const wizardStore = useWizardStore()
 const toast = useToast()
 const loading = ref(false)
+const router = useRouter()
 
 const show = () => {
   visible.value = true
@@ -69,6 +71,7 @@ const handleFinish = async () => {
       life: 3000
     })
     close()
+    router.push('/')
   } catch (error) {
     toast.add({
       severity: 'error',

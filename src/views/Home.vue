@@ -1,40 +1,107 @@
 <script setup lang="ts">
-import EventTypeSelector from '@/components/EventTypeSelector.vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import Button from 'primevue/button'
+import api from '@/services/api'
+
+const router = useRouter()
+const events = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/events', {params: {createdBy: 'me'}})
+    events.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch events:', error)
+  } finally {
+    loading.value = false
+  }
+})
+
+const navigateToCreate = () => {
+  router.push('/create')
+}
 </script>
 
 <template>
   <div class="home">
-    <h1 class="title">Create a New Event</h1>
-    <p class="subtitle">What type of event would you like to create?</p>
-    <EventTypeSelector />
+    <div class="header">
+      <h1>My Events</h1>
+      <Button label="Create a new event" @click="navigateToCreate" />
+    </div>
+
+    <div v-if="loading" class="loading">
+      Loading events...
+    </div>
+    
+    <div v-else-if="events.length === 0" class="no-events">
+      <p>You haven't created any events yet.</p>
+      <Button label="Create your first event" @click="navigateToCreate" />
+    </div>
+    
+    <div v-else class="events-grid">
+      <!-- We can expand this later with proper event cards -->
+      <div v-for="event in events" :key="event.id" class="event-card">
+        <h3>{{ event.name }}</h3>
+        <p>{{ event.date }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <style>
 .home {
-  text-align: center;
   padding: 2rem;
 }
 
-.title {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  color: var(--text-secondary-color);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
-button.p-button:hover {
-  color: white !important;
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
 }
 
-button.p-button {
-  color: white !important;
+.loading, .no-events {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary-color);
 }
 
+.no-events {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.event-card {
+  background: var(--surface-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid var(--surface-border);
+}
+
+.event-card h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+}
+
+.event-card p {
+  margin: 0;
+  color: var(--text-secondary-color);
+}
 </style>
