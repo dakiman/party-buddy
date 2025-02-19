@@ -10,7 +10,7 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const response = await api.get('/events', {params: {createdBy: 'me'}})
+    const response = await api.get('/events', { params: { createdBy: 'me' } })
     events.value = response.data
   } catch (error) {
     console.error('Failed to fetch events:', error)
@@ -34,17 +34,16 @@ const navigateToCreate = () => {
     <div v-if="loading" class="loading">
       Loading events...
     </div>
-    
+
     <div v-else-if="events.length === 0" class="no-events">
       <p>You haven't created any events yet.</p>
       <Button label="Create your first event" @click="navigateToCreate" />
     </div>
-    
+
     <div v-else class="events-grid">
-      <!-- We can expand this later with proper event cards -->
-      <div v-for="event in events" :key="event.id" class="event-card">
+      <div v-for="event in events" :key="event.id" class="event-card" @click="router.push(`/events/${event.id}`)">
         <h3>{{ event.name }}</h3>
-        <p>{{ event.date }}</p>
+        <p>{{ new Date(event.date).toLocaleDateString() }}</p>
       </div>
     </div>
   </div>
@@ -69,7 +68,8 @@ const navigateToCreate = () => {
   margin: 0;
 }
 
-.loading, .no-events {
+.loading,
+.no-events {
   text-align: center;
   padding: 3rem;
   color: var(--text-secondary-color);
@@ -93,6 +93,8 @@ const navigateToCreate = () => {
   border-radius: 8px;
   padding: 1.5rem;
   border: 1px solid var(--surface-border);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card h3 {
@@ -103,5 +105,10 @@ const navigateToCreate = () => {
 .event-card p {
   margin: 0;
   color: var(--text-secondary-color);
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 </style>

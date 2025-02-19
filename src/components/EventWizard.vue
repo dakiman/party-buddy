@@ -35,13 +35,13 @@ const close = () => {
 const handleFinish = async () => {
   try {
     loading.value = true
-    
+
     // Format the data according to the API requirements
     const eventData = {
       name: "My Party", // You might want to make this dynamic
       isPrivate: wizardStore.formData.isPrivate,
       date: wizardStore.formData.date?.toISOString().split('T')[0],
-      time: wizardStore.formData.time?.toLocaleTimeString('en-US', { 
+      time: wizardStore.formData.time?.toLocaleTimeString('en-US', {
         hour12: false,
         hour: '2-digit',
         minute: '2-digit',
@@ -59,7 +59,8 @@ const handleFinish = async () => {
         genres: artist.genres,
         spotifyUrl: artist.spotifyUrl
       })),
-      drinks: wizardStore.formData.drinks.map(drink => drink.id),
+      drinks: [], // Now an empty array
+      ingredients: wizardStore.formData.drinks.map(drink => drink.id), // Map drinks to ingredients
       food: wizardStore.formData.food
     }
 
@@ -90,13 +91,7 @@ defineExpose({
 </script>
 
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    :style="{ width: '90vw', maxWidth: '800px' }"
-    :closable="true"
-    @hide="close"
-  >
+  <Dialog v-model:visible="visible" modal :style="{ width: '90vw', maxWidth: '800px' }" :closable="true" @hide="close">
     <template #header>
       <h2 class="wizard-title">Create New Event</h2>
     </template>
@@ -114,73 +109,37 @@ defineExpose({
           <TimeAndPlaceStep ref="timeAndPlaceStep" />
           <div class="wizard-actions">
             <div></div> <!-- Empty div for spacing -->
-            <Button
-              label="Next"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              @click="() => {
-                if (timeAndPlaceStep?.isValid) {
-                  activateCallback('2')
-                } else {
-                  timeAndPlaceStep?.setTouched()
-                }
-              }"
-            />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => {
+              if (timeAndPlaceStep?.isValid) {
+                activateCallback('2')
+              } else {
+                timeAndPlaceStep?.setTouched()
+              }
+            }" />
           </div>
         </StepPanel>
 
         <StepPanel v-slot="{ activateCallback }" value="2">
           <MusicStep />
           <div class="wizard-actions">
-            <Button
-              label="Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              @click="() => activateCallback('1')"
-            />
-            <Button
-              label="Next"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              @click="() => activateCallback('3')"
-            />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback('1')" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback('3')" />
           </div>
         </StepPanel>
 
         <StepPanel v-slot="{ activateCallback }" value="3">
           <DrinksAndFoodStep />
           <div class="wizard-actions">
-            <Button
-              label="Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              @click="() => activateCallback('2')"
-            />
-            <Button
-              label="Next"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              @click="() => activateCallback('4')"
-            />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback('2')" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback('4')" />
           </div>
         </StepPanel>
 
         <StepPanel v-slot="{ activateCallback }" value="4">
           <ReviewStep />
           <div class="wizard-actions">
-            <Button
-              label="Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              @click="() => activateCallback('3')"
-            />
-            <Button
-              label="Finish"
-              severity="success"
-              icon="pi pi-check"
-              :loading="loading"
-              @click="handleFinish"
-            />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback('3')" />
+            <Button label="Finish" severity="success" icon="pi pi-check" :loading="loading" @click="handleFinish" />
           </div>
         </StepPanel>
       </StepPanels>
@@ -280,4 +239,4 @@ defineExpose({
   border-radius: 50%;
   object-fit: cover;
 }
-</style> 
+</style>
