@@ -64,7 +64,7 @@ const navigateToCreate = () => {
 .header h1 {
   font-size: 2rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--p-text-color);
   margin: 0;
 }
 
@@ -72,7 +72,7 @@ const navigateToCreate = () => {
 .no-events {
   text-align: center;
   padding: 3rem;
-  color: var(--text-secondary-color);
+  color: var(--p-text-secondary-color);
 }
 
 .no-events {
@@ -89,22 +89,22 @@ const navigateToCreate = () => {
 }
 
 .event-card {
-  background: var(--surface-card);
+  background: var(--p-surface-card);
   border-radius: 8px;
   padding: 1.5rem;
-  border: 1px solid var(--surface-border);
+  border: 1px solid var(--p-surface-border);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card h3 {
   margin: 0 0 0.5rem 0;
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
 
 .event-card p {
   margin: 0;
-  color: var(--text-secondary-color);
+  color: var(--p-text-secondary-color);
 }
 
 .event-card:hover {

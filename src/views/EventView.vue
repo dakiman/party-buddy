@@ -133,22 +133,22 @@ onMounted(async () => {
 .event-title {
   font-size: 2rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--p-text-color);
   margin-bottom: 2rem;
 }
 
 .event-section {
-  background: var(--surface-card);
+  background: var(--p-surface-card);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid var(--surface-border);
+  border: 1px solid var(--p-surface-border);
 }
 
 .event-section h2 {
   font-size: 1.25rem;
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--p-text-color);
   margin: 0 0 1.5rem 0;
 }
 
@@ -166,7 +166,7 @@ onMounted(async () => {
 
 .info-field label {
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--p-text-color);
   min-width: 120px;
 }
 
@@ -187,8 +187,8 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
-  background-color: var(--primary-color);
-  color: var(--primary-color-text);
+  background-color: var(--p-primary-color);
+  color: var(--p-rimary-color-text);
   border-radius: 1rem;
   font-size: 0.875rem;
 }
@@ -204,6 +204,6 @@ onMounted(async () => {
 .error-state {
   text-align: center;
   padding: 3rem;
-  color: var(--text-secondary-color);
+  color: var(--p-text-secondary-color);
 }
 </style> 

@@ -14,7 +14,6 @@ const menu = ref()
 
 const isLoggedIn = computed(() => authStore.isAuthenticated)
 const username = computed(() => authStore.user?.name || '')
-const menuVisible = ref(false)
 
 const menuItems = ref([
   {
@@ -60,7 +59,9 @@ function showRegister() {
   <header class="app-header">
     <div class="header-content">
       <div class="logo">
-        <img src="@/assets/logo.webp" alt="Logo" class="logo-image" />
+        <router-link to="/">
+          <img src="@/assets/logo.webp" alt="Logo" class="logo-image" />
+        </router-link>
       </div>
 
       <div class="header-actions">
