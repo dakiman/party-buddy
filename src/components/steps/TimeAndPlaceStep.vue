@@ -94,9 +94,7 @@ defineExpose({
 }
 
 .form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 0.3rem !important;
 }
 
 .form-field label {

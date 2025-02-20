@@ -116,19 +116,16 @@ watch(selectedArtists, (newValue) => {
     font-weight: 500;
 }
 
+
 .genre-pills {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
     margin-left: auto;
 }
 
-.genre-pill {
-    background-color: var(--primary-color);
-    color: var(--primary-color-text);
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    white-space: nowrap;
+.genre-pills .p-tag {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.60rem;
 }
 
 .artist-chip {
@@ -231,5 +228,22 @@ watch(selectedArtists, (newValue) => {
 
 .p-dialog-header-close {
     color: var(--p-text-color);
+}
+
+/* Add mobile-specific styles */
+@media (max-width: 767px) {
+    .artist-name {
+        font-size: 0.75rem;
+    }
+    
+    .artist-image {
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .chip-image {
+        width: 1rem;
+        height: 1rem;
+    }
 }
 </style>

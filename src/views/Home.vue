@@ -145,6 +145,15 @@ const openLoginModal = () => {
   margin: 0;
 }
 
+.header button {
+  background: var(--p-indigo-400);
+  color: #fff;
+}
+
+.header button:hover {
+  background: var(--p-indigo-500);
+}
+
 .loading,
 .no-events,
 .error {
