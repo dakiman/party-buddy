@@ -159,27 +159,27 @@ const openLoginModal = () => {
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
 }
 
 .event-card {
-  background: var(--p-surface-card);
+  background: var(--p-gray-800);
   border-radius: 8px;
   padding: 1.5rem;
-  border: 1px solid var(--p-surface-border);
+  border: 1px solid var(--p-indigo-400);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card h3 {
   margin: 0 0 0.5rem 0;
-  color: var(--p-text-color);
+  color: #fff;
 }
 
 .event-card p {
   margin: 0;
-  color: var(--p-text-secondary-color);
+  color: var(--p-indigo-400);
 }
 
 .event-card:hover {
