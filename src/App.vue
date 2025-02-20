@@ -1,15 +1,31 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import Toast from 'primevue/toast'
+import LoginModal from '@/components/LoginModal.vue'
+import RegisterModal from '@/components/RegisterModal.vue'
+
+const loginModal = ref()
+const registerModal = ref()
+
+const handleShowLogin = () => {
+  loginModal.value?.show()
+}
+
+const handleShowRegister = () => {
+  registerModal.value?.show()
+}
 </script>
 
 <template>
   <div id="app">
     <Toast position="top-center" />
-    <AppHeader />
+    <AppHeader @show-login="handleShowLogin" @show-register="handleShowRegister" />
     <main class="main-content">
-      <router-view></router-view>
+      <router-view @show-login="handleShowLogin" @show-register="handleShowRegister"></router-view>
     </main>
+    <LoginModal ref="loginModal" />
+    <RegisterModal ref="registerModal" />
   </div>
 </template>
 
@@ -25,25 +41,6 @@ import Toast from 'primevue/toast'
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-/* Toast mobile styling */
-@media screen and (max-width: 768px) {
-  .p-toast {
-    width: 90% !important;
-    max-width: 90vw !important;
-    right: auto !important;
-  }
-
-  .p-toast-message {
-    margin: 0 1rem;
-  }
-
-  .p-toast-top-center {
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
 </style>

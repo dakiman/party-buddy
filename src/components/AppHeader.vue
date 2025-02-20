@@ -46,12 +46,16 @@ const toggleMenu = (event: Event) => {
   menu.value.toggle(event)
 }
 
+const emit = defineEmits(['showLogin', 'showRegister'])
+
 function showLogin() {
   loginModal.value.show()
+  emit('showLogin')
 }
 
 function showRegister() {
   registerModal.value.show()
+  emit('showRegister')
 }
 </script>
 
