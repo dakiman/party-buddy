@@ -78,8 +78,14 @@ defineExpose({
 
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
-            <Calendar :modelValue="wizardStore.formData.date" @update:modelValue="updateDate" :minDate="new Date()"
-                :showIcon="true" dateFormat="dd/mm/yy" />
+            <Calendar 
+                :modelValue="wizardStore.formData.date" 
+                @update:modelValue="updateDate" 
+                :minDate="new Date()"
+                :showIcon="true" 
+                dateFormat="dd/mm/yy"
+                class="responsive-calendar"
+            />
             <small v-if="showError" class="error-text">Date is required</small>
         </div>
 
@@ -122,6 +128,30 @@ defineExpose({
 </template>
 
 <style>
+/* Remove previous problematic styles and add these */
+.responsive-calendar {
+    width: 100%;
+}
+
+/* Only style the popup panel, not the input */
+.p-datepicker-panel {
+    max-width: 95vw !important;
+    width: auto !important;
+    overflow: auto !important;
+}
+
+/* These styles are important for mobile */
+@media screen and (max-width: 768px) {
+    .p-datepicker table {
+        font-size: 0.85rem !important;
+    }
+    
+    .p-datepicker table td, .p-datepicker table th {
+        padding: 0.3rem !important;
+    }
+}
+
+/* Keep existing styles */
 .time-place-step {
     display: flex;
     flex-direction: column;
