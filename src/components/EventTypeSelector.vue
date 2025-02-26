@@ -37,14 +37,16 @@ const handleContinue = () => {
         :class="{ selected: selectedType === 'private' }"
         @click="selectType('private')"
       >
-        Private Party
+        <span>Private Party</span>
+        <i v-if="selectedType === 'private'" class="pi pi-check-circle selection-icon"></i>
       </Button>
       <Button
         class="type-button"
         :class="{ selected: selectedType === 'public' }"
         @click="selectType('public')"
       >
-        Public Event
+        <span>Public Event</span>
+        <i v-if="selectedType === 'public'" class="pi pi-check-circle selection-icon"></i>
       </Button>
     </div>
 
@@ -97,11 +99,36 @@ const handleContinue = () => {
   border: 2px solid #7B7EF6;
   transition: all 0.2s ease;
   color: #ffffff;
+  position: relative;
+  height: 50px;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.type-button span {
+  white-space: nowrap;
 }
 
 .type-button.selected {
   background-color: #7B7EF6;
   border-color: #7B7EF6;
+  font-weight: bold;
+  box-shadow: 0 0 12px rgba(123, 126, 246, 0.6);
+  transform: scale(1.05);
+}
+
+.selection-icon {
+  margin-left: 8px;
+  font-size: 1.2rem;
+  animation: pop-in 0.3s ease;
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .step-selection {
