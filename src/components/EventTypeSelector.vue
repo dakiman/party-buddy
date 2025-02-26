@@ -71,14 +71,9 @@ const handleContinue = () => {
 
 .type-button {
   flex: 1;
-  background-color: var(--surface-card);
   border: 2px solid #7B7EF6;
   transition: all 0.2s ease;
   color: #ffffff;
-}
-
-.type-button:hover {
-  background-color: var(--surface-hover);
 }
 
 .type-button.selected {
