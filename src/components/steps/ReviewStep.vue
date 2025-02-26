@@ -35,7 +35,7 @@ const wizardStore = useWizardStore()
       </div>
     </div>
 
-    <div class="review-section" v-if="wizardStore.formData.artists.length">
+    <div class="review-section" v-if="wizardStore.formData.enabledSteps.music && wizardStore.formData.artists.length">
       <h4>Music</h4>
       <div class="review-field">
         <label>Artists:</label>
@@ -48,7 +48,8 @@ const wizardStore = useWizardStore()
       </div>
     </div>
 
-    <div class="review-section">
+    <div class="review-section" v-if="wizardStore.formData.enabledSteps.drinksAndFood && 
+        (wizardStore.formData.drinks.length || wizardStore.formData.food.length)">
       <h4>Drinks & Food</h4>
       <div class="review-field" v-if="wizardStore.formData.drinks.length">
         <label>Drinks:</label>

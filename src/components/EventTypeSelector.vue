@@ -3,10 +3,13 @@ import { ref, computed } from 'vue'
 import Button from 'primevue/button'
 import EventWizard from './EventWizard.vue'
 import { useWizardStore } from '../stores/wizard'
+import Checkbox from 'primevue/checkbox'
 
 const selectedType = ref<'private' | 'public' | null>(null)
 const eventWizard = ref()
 const wizardStore = useWizardStore()
+const enableMusic = ref(true)
+const enableDrinksAndFood = ref(true)
 
 const showContinueButton = computed(() => selectedType.value !== null)
 
@@ -16,6 +19,12 @@ const selectType = (type: 'private' | 'public') => {
 }
 
 const handleContinue = () => {
+  wizardStore.updateFormData({
+    enabledSteps: {
+      music: enableMusic.value,
+      drinksAndFood: enableDrinksAndFood.value
+    }
+  })
   eventWizard.value.show()
 }
 </script>
@@ -37,6 +46,20 @@ const handleContinue = () => {
       >
         Public Event
       </Button>
+    </div>
+
+    <div class="step-selection" v-if="selectedType">
+      <h3>What would you like to include?</h3>
+      <div class="step-options">
+        <div class="option-item">
+          <Checkbox v-model="enableMusic" :binary="true" inputId="music" />
+          <label for="music">Music Selection</label>
+        </div>
+        <div class="option-item">
+          <Checkbox v-model="enableDrinksAndFood" :binary="true" inputId="drinksAndFood" />
+          <label for="drinksAndFood">Drinks & Food</label>
+        </div>
+      </div>
     </div>
 
     <transition name="fade">
@@ -79,6 +102,37 @@ const handleContinue = () => {
 .type-button.selected {
   background-color: #7B7EF6;
   border-color: #7B7EF6;
+}
+
+.step-selection {
+  background-color: rgba(123, 126, 246, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  text-align: left;
+}
+
+.step-selection h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.step-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.option-item label {
+  cursor: pointer;
 }
 
 .continue-button {
