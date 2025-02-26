@@ -200,7 +200,7 @@ watch([selectedDrinks, selectedFood], ([newDrinks, newFood]) => {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.125rem 0.5rem 0.125rem 0.125rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.5rem;
     background-color: var(--p-primary-color);
     color: var(--primary-color-text);
     border-radius: 1rem;

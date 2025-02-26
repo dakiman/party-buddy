@@ -88,7 +88,7 @@ onMounted(async () => {
       </div>
 
       <!-- Drinks & Food Section -->
-      <div class="event-section">
+      <div class="event-section" v-if="event.ingredients?.length || event.food?.length">
         <h2>Drinks & Food</h2>
         <div class="section-content">
           <div class="info-field" v-if="event.ingredients?.length">
