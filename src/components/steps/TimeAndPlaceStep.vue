@@ -9,8 +9,18 @@ const wizardStore = useWizardStore()
 const includeLocation = ref(!!wizardStore.formData.location)
 const touched = ref(false)
 
-const isValid = computed(() => wizardStore.formData.date !== null)
+// Set default event name if it's empty
+if (!wizardStore.formData.name) {
+    wizardStore.updateFormData({ name: 'My awesome party' })
+}
+
+const isValid = computed(() => 
+    wizardStore.formData.date !== null && 
+    wizardStore.formData.name && 
+    wizardStore.formData.name.trim() !== ''
+)
 const showError = computed(() => touched.value && !wizardStore.formData.date)
+const showNameError = computed(() => touched.value && (!wizardStore.formData.name || wizardStore.formData.name.trim() === ''))
 
 const setTouched = () => {
     touched.value = true
@@ -33,6 +43,18 @@ const updateLocationDescription = (event: Event) => {
     wizardStore.updateFormData({ locationDescription: value })
 }
 
+const updateName = (event: Event) => {
+    const value = (event.target as HTMLInputElement).value
+    wizardStore.updateFormData({ name: value })
+}
+
+const handleNameFocus = () => {
+    // Clear the default value when focused if it's still the default
+    if (wizardStore.formData.name === 'My awesome party') {
+        wizardStore.updateFormData({ name: '' })
+    }
+}
+
 defineExpose({
     isValid,
     setTouched
@@ -41,6 +63,19 @@ defineExpose({
 
 <template>
     <div class="time-place-step">
+        <div class="form-field">
+            <label>What's your event called? <span class="required">*</span></label>
+            <input
+                type="text"
+                :value="wizardStore.formData.name"
+                @input="updateName"
+                @focus="handleNameFocus"
+                placeholder="My awesome party"
+                class="p-inputtext"
+            />
+            <small v-if="showNameError" class="error-text">Event name is required</small>
+        </div>
+
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
             <Calendar :modelValue="wizardStore.formData.date" @update:modelValue="updateDate" :minDate="new Date()"

@@ -9,6 +9,14 @@ const wizardStore = useWizardStore()
     <h3 class="text-xl mb-4">Review your event details</h3>
     
     <div class="review-section">
+      <h4>Event Name</h4>
+      <div class="review-field">
+        <label>Name:</label>
+        <span>{{ wizardStore.formData.name }}</span>
+      </div>
+    </div>
+    
+    <div class="review-section">
       <h4>Event Type</h4>
       <div class="review-field">
         <label>Type:</label>

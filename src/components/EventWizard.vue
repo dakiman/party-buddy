@@ -85,7 +85,7 @@ const handleFinish = async () => {
 
     // Format the data according to the API requirements
     const eventData = {
-      name: "My Party", // You might want to make this dynamic
+      name: wizardStore.formData.name,
       isPrivate: wizardStore.formData.isPrivate,
       date: wizardStore.formData.date?.toISOString().split('T')[0],
       time: wizardStore.formData.time?.toLocaleTimeString('en-US', {
