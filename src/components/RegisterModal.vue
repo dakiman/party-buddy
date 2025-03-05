@@ -16,14 +16,14 @@ const visible = ref(false)
 const loading = ref(false)
 
 const form = ref({
-  name: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: ''
 })
 
 const rules = {
-  name: { required, minLength: minLength(2) },
+  username: { required, minLength: minLength(3) },
   email: { required, email },
   password: { required, minLength: minLength(8) },
   confirmPassword: { 
@@ -40,7 +40,12 @@ async function handleSubmit() {
     const isValid = await v$.value.$validate()
     if (!isValid) return
 
-    await authStore.register(form.value.email, form.value.password, form.value.name)
+    await authStore.register(
+      form.value.email,
+      form.value.password,
+      form.value.username
+    )
+    
     toast.add({ severity: 'success', summary: 'Success', detail: 'Registered successfully', life: 3000 })
     visible.value = false
     resetForm()
@@ -52,7 +57,7 @@ async function handleSubmit() {
 }
 
 function resetForm() {
-  form.value = { name: '', email: '', password: '', confirmPassword: '' }
+  form.value = { username: '', email: '', password: '', confirmPassword: '' }
   v$.value.$reset()
 }
 
@@ -72,13 +77,13 @@ defineExpose({
     <form @submit.prevent="handleSubmit" class="auth-form">
       <div class="form-field">
         <InputText
-          id="name"
-          v-model="form.name"
-          :class="{ 'p-invalid': v$.name.$error }"
-          placeholder="Name"
+          id="username"
+          v-model="form.username"
+          :class="{ 'p-invalid': v$.username.$error }"
+          placeholder="Username"
         />
-        <small class="p-error" v-if="v$.name.$error">
-          Name must be at least 2 characters long
+        <small class="p-error" v-if="v$.username.$error">
+          Username must be at least 3 characters long
         </small>
       </div>
 
@@ -149,14 +154,7 @@ defineExpose({
 .p-password input,
 .p-inputtext {
   width: 100%;
-  background-color: transparent;
-  border: 1px solid var(--surface-border);
-  color: var(--text-color);
   padding: 0.75rem;
-}
-
-.p-password-input {
-  background-color: transparent !important;
 }
 
 .p-password i {

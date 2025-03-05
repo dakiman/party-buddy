@@ -119,14 +119,7 @@ defineExpose({
 .p-password input,
 .p-inputtext {
   width: 100%;
-  background-color: transparent;
-  border: 1px solid var(--surface-border);
-  color: var(--text-color);
   padding: 0.75rem;
-}
-
-.p-password-input {
-  background-color: transparent !important;
 }
 
 .p-password i {

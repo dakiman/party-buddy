@@ -205,19 +205,6 @@ watch(selectedArtists, (newValue) => {
     display: none;
 }
 
-.p-password input,
-.p-inputtext {
-    width: 100%;
-    background-color: transparent;
-    border: 1px solid var(--p-surface-border);
-    color: var(--p-text-color);
-    padding: 0.75rem;
-}
-
-.p-password i {
-    color: var(--p-text-color);
-}
-
 .p-dialog-header {
     padding: 1.5rem;
     background-color: transparent;
