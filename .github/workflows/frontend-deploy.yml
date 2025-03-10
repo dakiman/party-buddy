@@ -42,7 +42,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo rm -rf /var/www/frontend/*
-            sudo cp -r /tmp/frontend-deploy/* /var/www/frontend/
-            sudo chown -R www-data:www-data /var/www/frontend
-            sudo chmod -R 755 /var/www/frontend
+            sudo -S rm -rf /var/www/frontend/*
+            sudo -S cp -r /tmp/frontend-deploy/* /var/www/frontend/
+            sudo -S chown -R www-data:www-data /var/www/frontend
+            sudo -S chmod -R 755 /var/www/frontend
