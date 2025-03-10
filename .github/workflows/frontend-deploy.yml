@@ -26,15 +26,14 @@ jobs:
           npm run build
 
       - name: Deploy to server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mkdir -p /tmp/frontend-deploy
-            rm -rf /tmp/frontend-deploy/*
-
+          source: "dist/*"
+          target: "/tmp/frontend-deploy"
+          strip_components: 2
 
       - name: Move files and set permissions
         uses: appleboy/ssh-action@master
