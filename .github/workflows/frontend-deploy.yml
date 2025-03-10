@@ -33,7 +33,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "dist/*"
           target: "/tmp/frontend-deploy"
-          strip_components: 2
+          strip_components: 1
 
       - name: Move files and set permissions
         uses: appleboy/ssh-action@master
