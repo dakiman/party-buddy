@@ -91,8 +91,7 @@ const handleFinish = async () => {
       time: wizardStore.formData.time?.toLocaleTimeString('en-US', {
         hour12: false,
         hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+        minute: '2-digit'
       }),
       location: wizardStore.formData.location ? {
         lat: wizardStore.formData.location.lat,
