@@ -57,4 +57,8 @@ const handleShowRegister = () => {
   margin: 0 auto;
 }
 
+.p-dialog-mask.p-overlay-mask {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
 </style>

@@ -46,7 +46,7 @@ watch(selectedArtists, (newValue) => {
             <label>Search for artists</label>
             <AutoComplete v-model="selectedArtists" :suggestions="searchResults" @complete="search" :multiple="true"
                 :delay="300" :loading="loading" optionLabel="name" placeholder="Type to search artists..."
-                class="w-full">
+                appendTo="body" class="w-full">
                 <template #option="slotProps">
                     <div class="artist-option">
                         <div class="artist-info">

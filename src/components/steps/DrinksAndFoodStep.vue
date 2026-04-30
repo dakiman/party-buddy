@@ -90,7 +90,7 @@ watch([selectedDrinks, selectedFood], ([newDrinks, newFood]) => {
             <label>Drinks</label>
             <AutoComplete v-model="selectedDrinks" :suggestions="drinkSearchResults" @complete="searchDrinks"
                 :multiple="true" :delay="300" :loading="loadingDrinks" optionLabel="name"
-                placeholder="Type to search drinks..." class="w-full">
+                placeholder="Type to search drinks..." appendTo="body" class="w-full">
                 <template #option="slotProps">
                     <div class="item-option">
                         <div class="item-info">
@@ -126,6 +126,7 @@ watch([selectedDrinks, selectedFood], ([newDrinks, newFood]) => {
                 :multiple="true"
                 :delay="300"
                 placeholder="Type to search food..."
+                appendTo="body"
                 class="w-full"
             >
                 <template #option="slotProps">

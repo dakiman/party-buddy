@@ -13,7 +13,7 @@ const registerModal = ref()
 const menu = ref()
 
 const isLoggedIn = computed(() => authStore.isAuthenticated)
-const username = computed(() => authStore.user?.name || '')
+const username = computed(() => authStore.user?.username || '')
 
 const menuItems = ref([
   {
@@ -72,7 +72,7 @@ function showRegister() {
             icon="pi pi-bars"
             class="menu-button p-button-text p-button-rounded"
             @click="toggleMenu($event)"
-            aria-label="Menu"
+            aria-label="Open navigation menu"
           />
           <div class="user-info">
             <Avatar 
@@ -85,7 +85,7 @@ function showRegister() {
               icon="pi pi-chevron-down"
               class="p-button-text p-button-rounded desktop-menu-trigger"
               @click="toggleMenu($event)"
-              aria-label="Menu"
+              aria-label="Open user menu"
             />
           </div>
           <Menu 

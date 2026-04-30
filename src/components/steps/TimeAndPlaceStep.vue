@@ -9,12 +9,7 @@ const wizardStore = useWizardStore()
 const includeLocation = ref(!!wizardStore.formData.location)
 const touched = ref(false)
 
-// Set default event name if it's empty
-if (!wizardStore.formData.name) {
-    wizardStore.updateFormData({ name: 'My awesome party' })
-}
-
-const isValid = computed(() => 
+const isValid = computed(() =>
     wizardStore.formData.date !== null && 
     wizardStore.formData.name && 
     wizardStore.formData.name.trim() !== ''
@@ -48,13 +43,6 @@ const updateName = (event: Event) => {
     wizardStore.updateFormData({ name: value })
 }
 
-const handleNameFocus = () => {
-    // Clear the default value when focused if it's still the default
-    if (wizardStore.formData.name === 'My awesome party') {
-        wizardStore.updateFormData({ name: '' })
-    }
-}
-
 defineExpose({
     isValid,
     setTouched
@@ -69,7 +57,6 @@ defineExpose({
                 type="text"
                 :value="wizardStore.formData.name"
                 @input="updateName"
-                @focus="handleNameFocus"
                 placeholder="My awesome party"
                 class="p-inputtext"
             />
@@ -78,13 +65,14 @@ defineExpose({
 
         <div class="form-field">
             <label>What day is your event? <span class="required">*</span></label>
-            <Calendar 
-                :modelValue="wizardStore.formData.date" 
-                @update:modelValue="updateDate" 
+            <Calendar
+                :modelValue="wizardStore.formData.date"
+                @update:modelValue="updateDate"
                 :minDate="new Date()"
-                :showIcon="true" 
+                :showIcon="true"
                 dateFormat="dd/mm/yy"
                 class="responsive-calendar"
+                appendTo="body"
             />
             <small v-if="showError" class="error-text">Date is required</small>
         </div>
@@ -92,7 +80,7 @@ defineExpose({
         <div class="form-field">
             <label>What time?</label>
             <Calendar :modelValue="wizardStore.formData.time" @update:modelValue="updateTime" showIcon fluid
-                iconDisplay="input" timeOnly :stepMinute="15" :defaultTime="{ hours: 12, minutes: 0 }">
+                iconDisplay="input" timeOnly :stepMinute="15" :defaultTime="{ hours: 12, minutes: 0 }" appendTo="body">
                 <template #inputicon="slotProps">
                     <i class="pi pi-clock" @click="slotProps.clickCallback" />
                 </template>
