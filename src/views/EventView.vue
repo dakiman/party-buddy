@@ -1,24 +1,25 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import api from '@/services/api'
+import { getEvent } from '@/services/events'
 import { useToast } from 'primevue/usetoast'
+import type { EventResponse } from '@/types'
 
 const route = useRoute()
 const toast = useToast()
 const loading = ref(true)
-const event = ref<any>(null)
+const event = ref<EventResponse | null>(null)
 
 onMounted(async () => {
   try {
-    const response = await api.get(`/events/${route.params.id}`)
-    event.value = response.data
+    const id = Number(route.params.id)
+    event.value = await getEvent(id)
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'Error',
       detail: 'Failed to load event details',
-      life: 3000
+      life: 3000,
     })
   } finally {
     loading.value = false
@@ -60,11 +61,11 @@ onMounted(async () => {
           <div class="info-field" v-if="event.location">
             <label>Location:</label>
             <div class="location-info">
-              <span v-if="event.location.locationDescription">
-                {{ event.location.locationDescription }}
+              <span v-if="event.location.description">
+                {{ event.location.description }}
               </span>
-              <span v-if="event.location.lat && event.location.lng">
-                {{ event.location.lat.toFixed(6) }}, {{ event.location.lng.toFixed(6) }}
+              <span v-if="event.location.latitude && event.location.longitude">
+                {{ event.location.latitude.toFixed(6) }}, {{ event.location.longitude.toFixed(6) }}
               </span>
             </div>
           </div>
