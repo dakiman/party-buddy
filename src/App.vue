@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
 import LoginModal from '@/components/LoginModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
 import { useToast } from 'primevue/usetoast'
@@ -32,6 +33,7 @@ const handleShowRegister = () => {
 <template>
   <div id="app">
     <Toast position="top-center" />
+    <ConfirmDialog />
     <AppHeader @show-login="handleShowLogin" @show-register="handleShowRegister" />
     <main class="main-content">
       <router-view @show-login="handleShowLogin" @show-register="handleShowRegister"></router-view>

@@ -1,5 +1,5 @@
 import api from './api'
-import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location } from '@/types'
+import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload } from '@/types'
 
 // Wire-level shape of an Event as returned by the BE — pre-normalization.
 // Differs from EventResponse only in the `artists[].spotifyId` field name.
@@ -25,6 +25,7 @@ interface RawEventResponse {
   isPrivate: boolean
   createdAt: string
   updatedAt: string
+  creatorUsername: string
   // The BE also sends a `drinks` array (legacy field, always empty from FE).
   // Type as unknown — we don't read it on the FE.
   drinks?: unknown
@@ -55,6 +56,7 @@ function normalizeEvent(raw: RawEventResponse): EventResponse {
     isPrivate: raw.isPrivate,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
+    creatorUsername: raw.creatorUsername,
   }
 }
 
@@ -73,4 +75,13 @@ export async function listMyEvents(): Promise<EventResponse[]> {
     params: { createdBy: 'ME' },
   })
   return data.map(normalizeEvent)
+}
+
+export async function updateEvent(id: number, payload: UpdateEventPayload): Promise<EventResponse> {
+  const { data } = await api.put<RawEventResponse>(`/events/${id}`, payload)
+  return normalizeEvent(data)
+}
+
+export async function deleteEvent(id: number): Promise<void> {
+  await api.delete(`/events/${id}`)
 }

@@ -27,6 +27,7 @@ Vue 3 SPA. Single root layout (`App.vue`) with a persistent header + `router-vie
 /                Home.vue          Auth-gated event list; welcome view otherwise
 /create          CreateEvent.vue   Renders EventTypeSelector → opens EventWizard modal
 /events/:id      EventView.vue     Single event, read-only
+/events/:id/edit  EditEvent.vue     Edit event; fetches event, guards creator, opens EventWizard in edit mode
 ```
 
 ### Wizard flow
@@ -73,6 +74,10 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 - **The `<meta viewport>` tag has `maximum-scale=1.0, user-scalable=no`** — accessibility issue. Phase 9 polish removes this.
 - **Dark mode is forced** — no light toggle. Phase 9 adds one.
 - **`PostEventRequest.drinks` is sent as `[]` always** from `EventWizard.handleFinish()` — historical artifact; removed when BE drops the field in Phase 9.
+- **`EventWizard` is dual-mode** — pass `:initialEvent="event"` to put it in edit mode. `show()` calls `seedStoreFromEvent()` internally before opening the dialog. `handleFinish` branches on `isEditMode`: edit mode calls `updateEvent(id, payload)` and navigates to `/events/:id`; create mode calls `createEvent(payload)` and navigates to `/`. The `close()` / store reset is mode-agnostic.
+- **`ConfirmDialog` must be mounted in `App.vue`** — PrimeVue's `useConfirm()` composable requires a single `<ConfirmDialog />` instance in the component tree and `ConfirmationService` installed on the Vue app. Both are now present. Do not add a second `<ConfirmDialog />` or the confirm callbacks will fire twice.
+- **`EventResponse.creatorUsername`** — the BE now includes `creatorUsername` on every event response. `EventView` and `EditEvent` use it to gate Edit/Delete visibility and to guard the edit route. The FE also relies on `authStore.user?.username` being populated (via `GET /auth/user` on store init).
+- **`deleteEvent` cascades on the BE** — the BE uses `eventRepository.delete(entity)` (not `deleteById`) so join-table rows (`event_artists`, `event_drinks`, `event_ingredients`, `event_food_items`) are cleared before the parent row is removed. The FE just calls `DELETE /events/{id}` and handles 204.
 
 ## Where to add things
 

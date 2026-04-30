@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getEvent } from '@/services/events'
+import { useRoute, useRouter } from 'vue-router'
+import { getEvent, deleteEvent } from '@/services/events'
+import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
+import Button from 'primevue/button'
 import type { EventResponse } from '@/types'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 const toast = useToast()
+const confirm = useConfirm()
 const loading = ref(true)
 const event = ref<EventResponse | null>(null)
 
@@ -14,7 +20,7 @@ onMounted(async () => {
   try {
     const id = Number(route.params.id)
     event.value = await getEvent(id)
-  } catch (error) {
+  } catch {
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -25,6 +31,42 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function goToEdit() {
+  if (event.value) {
+    router.push(`/events/${event.value.id}/edit`)
+  }
+}
+
+function confirmDelete() {
+  confirm.require({
+    message: 'Are you sure you want to delete this event? This cannot be undone.',
+    header: 'Delete Event',
+    icon: 'pi pi-exclamation-triangle',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Delete',
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      try {
+        await deleteEvent(event.value!.id)
+        toast.add({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'Event deleted successfully.',
+          life: 3000,
+        })
+        router.push('/')
+      } catch {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete event. Please try again.',
+          life: 3000,
+        })
+      }
+    },
+  })
+}
 </script>
 
 <template>
@@ -35,6 +77,24 @@ onMounted(async () => {
 
     <template v-else-if="event">
       <h1 class="event-title">{{ event.name }}</h1>
+
+      <!-- Creator-only actions — gated client-side; BE enforces 403 -->
+      <div
+        v-if="authStore.user?.username === event.creatorUsername"
+        class="event-actions"
+      >
+        <Button
+          label="Edit"
+          icon="pi pi-pencil"
+          @click="goToEdit"
+        />
+        <Button
+          label="Delete"
+          icon="pi pi-trash"
+          severity="danger"
+          @click="confirmDelete"
+        />
+      </div>
 
       <!-- Time & Place Section -->
       <div class="event-section">
@@ -206,5 +266,11 @@ onMounted(async () => {
   text-align: center;
   padding: 3rem;
   color: var(--p-text-secondary-color);
+}
+
+.event-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 </style> 
