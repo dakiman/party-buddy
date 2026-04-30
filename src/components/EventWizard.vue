@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Stepper from 'primevue/stepper'
@@ -39,6 +39,14 @@ const wizardStore = useWizardStore()
 const toast = useToast()
 const loading = ref(false)
 const router = useRouter()
+const currentStep = ref<StepKey>('timeAndPlace')
+
+watch(currentStep, () => {
+  nextTick(() => {
+    const stepperEl = document.getElementById('stepper')
+    stepperEl?.closest('.p-dialog-content')?.scrollTo({ top: 0 })
+  })
+})
 
 const isEditMode = computed(() => props.initialEvent !== undefined)
 
@@ -90,6 +98,7 @@ const show = () => {
 const close = () => {
   visible.value = false
   wizardStore.resetForm()
+  currentStep.value = 'timeAndPlace'
 }
 
 const handleFinish = async () => {
@@ -204,9 +213,21 @@ defineExpose({
       <h2 class="wizard-title">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h2>
     </template>
 
-    <Stepper value="timeAndPlace" linear id="stepper">
+    <Stepper v-model:value="currentStep" linear id="stepper">
       <StepList>
-        <Step v-for="key in activeSteps" :key="key" :value="key">
+        <Step
+          v-for="(key, idx) in activeSteps"
+          :key="key"
+          :value="key"
+          :pt="{
+            number: () => ({
+              innerHTML:
+                activeSteps.indexOf(key) < activeSteps.indexOf(currentStep)
+                  ? '<i class=\'pi pi-check\'></i>'
+                  : String(idx + 1),
+            }),
+          }"
+        >
           {{ STEP_LABEL[key] }}
         </Step>
       </StepList>
@@ -217,7 +238,7 @@ defineExpose({
           <TimeAndPlaceStep ref="timeAndPlaceStep" />
           <div class="wizard-actions">
             <div></div>
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => {
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" :aria-label="`Next: ${STEP_LABEL[nextStep('timeAndPlace')]}`" @click="() => {
               if (timeAndPlaceStep?.isValid) {
                 activateCallback(nextStep('timeAndPlace'))
               } else {
@@ -232,7 +253,7 @@ defineExpose({
           <MusicStep />
           <div class="wizard-actions">
             <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('music'))" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('music'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" :aria-label="`Next: ${STEP_LABEL[nextStep('music')]}`" @click="() => activateCallback(nextStep('music'))" />
           </div>
         </StepPanel>
 
@@ -241,7 +262,7 @@ defineExpose({
           <DrinksAndFoodStep />
           <div class="wizard-actions">
             <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('drinksAndFood'))" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('drinksAndFood'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" :aria-label="`Next: ${STEP_LABEL[nextStep('drinksAndFood')]}`" @click="() => activateCallback(nextStep('drinksAndFood'))" />
           </div>
         </StepPanel>
 
