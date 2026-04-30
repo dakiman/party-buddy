@@ -17,6 +17,16 @@ import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
 import type { CreateEventPayload } from '@/types'
 
+const STEP_KEYS = ['timeAndPlace', 'music', 'drinksAndFood', 'review'] as const
+type StepKey = typeof STEP_KEYS[number]
+
+const STEP_LABEL: Record<StepKey, string> = {
+  timeAndPlace: 'Time & Place',
+  music: 'Music',
+  drinksAndFood: 'Drinks & Food',
+  review: 'Review',
+}
+
 const visible = ref(false)
 const timeAndPlaceStep = ref()
 const wizardStore = useWizardStore()
@@ -24,44 +34,27 @@ const toast = useToast()
 const loading = ref(false)
 const router = useRouter()
 
-// Generate step values based on enabled steps
-const getStepValue = (baseValue: number) => {
-  let adjustedValue = baseValue
+/**
+ * The ordered list of steps actually visible in the current wizard run.
+ * `timeAndPlace` and `review` are mandatory; `music` and `drinksAndFood` are
+ * optional and toggled in the Time & Place step's checkboxes.
+ */
+const activeSteps = computed<StepKey[]>(() => {
+  const steps: StepKey[] = ['timeAndPlace']
+  if (wizardStore.formData.enabledSteps.music) steps.push('music')
+  if (wizardStore.formData.enabledSteps.drinksAndFood) steps.push('drinksAndFood')
+  steps.push('review')
+  return steps
+})
 
-  if (!wizardStore.formData.enabledSteps.music && baseValue > 1) {
-    adjustedValue--
-  }
-
-  if (!wizardStore.formData.enabledSteps.drinksAndFood) {
-    const musicStep = wizardStore.formData.enabledSteps.music ? 2 : 1
-    if (baseValue > musicStep) {
-      adjustedValue--
-    }
-  }
-
-  return String(adjustedValue)
+function nextStep(current: StepKey): StepKey {
+  const idx = activeSteps.value.indexOf(current)
+  return activeSteps.value[Math.min(idx + 1, activeSteps.value.length - 1)]
 }
 
-const getNextStep = (currentStep: string) => {
-  const current = parseInt(currentStep)
-
-  if (current === 1) {
-    if (wizardStore.formData.enabledSteps.music) {
-      return '2'
-    } else if (wizardStore.formData.enabledSteps.drinksAndFood) {
-      return '2'
-    } else {
-      return '2'
-    }
-  } else if (current === 2) {
-    if (wizardStore.formData.enabledSteps.music && wizardStore.formData.enabledSteps.drinksAndFood) {
-      return '3'
-    } else {
-      return '3'
-    }
-  } else {
-    return '4'
-  }
+function prevStep(current: StepKey): StepKey {
+  const idx = activeSteps.value.indexOf(current)
+  return activeSteps.value[Math.max(idx - 1, 0)]
 }
 
 const show = () => {
@@ -141,26 +134,22 @@ defineExpose({
       <h2 class="wizard-title">Create New Event</h2>
     </template>
 
-    <Stepper value="1" linear id="stepper">
+    <Stepper value="timeAndPlace" linear id="stepper">
       <StepList>
-        <Step value="1">Time & Place</Step>
-        <Step v-if="wizardStore.formData.enabledSteps.music" value="2">Music</Step>
-        <Step v-if="wizardStore.formData.enabledSteps.drinksAndFood" 
-             :value="wizardStore.formData.enabledSteps.music ? '3' : '2'">
-          Drinks & Food
+        <Step v-for="key in activeSteps" :key="key" :value="key">
+          {{ STEP_LABEL[key] }}
         </Step>
-        <Step :value="getStepValue(4)">Review</Step>
       </StepList>
 
       <StepPanels>
-        <!-- Time & Place Step (always included) -->
-        <StepPanel v-slot="{ activateCallback }" value="1">
+        <!-- Time & Place — always present -->
+        <StepPanel v-slot="{ activateCallback }" value="timeAndPlace">
           <TimeAndPlaceStep ref="timeAndPlaceStep" />
           <div class="wizard-actions">
-            <div></div> <!-- Empty div for spacing -->
+            <div></div>
             <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => {
               if (timeAndPlaceStep?.isValid) {
-                activateCallback(getNextStep('1'))
+                activateCallback(nextStep('timeAndPlace'))
               } else {
                 timeAndPlaceStep?.setTouched()
               }
@@ -168,42 +157,29 @@ defineExpose({
           </div>
         </StepPanel>
 
-        <!-- Music Step (optional) -->
-        <StepPanel v-if="wizardStore.formData.enabledSteps.music" v-slot="{ activateCallback }" value="2">
+        <!-- Music — optional -->
+        <StepPanel v-if="wizardStore.formData.enabledSteps.music" v-slot="{ activateCallback }" value="music">
           <MusicStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback('1')" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" 
-                   @click="() => activateCallback(wizardStore.formData.enabledSteps.drinksAndFood ? '3' : getStepValue(4))" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('music'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('music'))" />
           </div>
         </StepPanel>
 
-        <!-- Drinks & Food Step (optional) -->
-        <StepPanel v-if="wizardStore.formData.enabledSteps.drinksAndFood" 
-                  v-slot="{ activateCallback }" 
-                  :value="wizardStore.formData.enabledSteps.music ? '3' : '2'">
+        <!-- Drinks & Food — optional -->
+        <StepPanel v-if="wizardStore.formData.enabledSteps.drinksAndFood" v-slot="{ activateCallback }" value="drinksAndFood">
           <DrinksAndFoodStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" 
-                   @click="() => activateCallback(wizardStore.formData.enabledSteps.music ? '2' : '1')" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" 
-                   @click="() => activateCallback(getStepValue(4))" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('drinksAndFood'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('drinksAndFood'))" />
           </div>
         </StepPanel>
 
-        <!-- Review Step (always included, but with variable value) -->
-        <StepPanel v-slot="{ activateCallback }" :value="getStepValue(4)">
+        <!-- Review — always present -->
+        <StepPanel v-slot="{ activateCallback }" value="review">
           <ReviewStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => {
-              if (wizardStore.formData.enabledSteps.drinksAndFood) {
-                activateCallback(wizardStore.formData.enabledSteps.music ? '3' : '2')
-              } else if (wizardStore.formData.enabledSteps.music) {
-                activateCallback('2')
-              } else {
-                activateCallback('1')
-              }
-            }" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('review'))" />
             <Button label="Finish" severity="success" icon="pi pi-check" :loading="loading" @click="handleFinish" />
           </div>
         </StepPanel>
