@@ -56,7 +56,8 @@ export const useAuthStore = defineStore("auth", () => {
     api
       .get("/auth/user")
       .then((response) => {
-        user.value = response.data;
+        // GET /auth/user returns AuthResponse { token, user } — pull out user.
+        user.value = response.data.user;
       })
       .catch(() => {
         logout();

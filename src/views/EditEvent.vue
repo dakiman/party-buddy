@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getEvent } from '@/services/events'
 import { useAuthStore } from '@/stores/auth'
@@ -29,7 +29,10 @@ onMounted(async () => {
     }
 
     event.value = fetched
-    // Open the wizard immediately; seedStoreFromEvent runs inside show().
+    // Wait for Vue to mount the EventWizard (gated by `v-if="event"`) before
+    // calling its imperative show(). Without nextTick, wizardRef is still null
+    // at this point and the dialog never opens.
+    await nextTick()
     wizardRef.value?.show()
   } catch {
     toast.add({
