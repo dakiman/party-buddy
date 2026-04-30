@@ -147,14 +147,14 @@ function showRegister() {
   gap: 0.5rem;
 }
 
-.user-info {
+.app-header .user-info {
   display: none;
   align-items: center;
   gap: 0.5rem;
 }
 
-.menu-button {
-  display: block;
+.app-header .menu-button {
+  display: inline-flex;
 }
 
 .auth-buttons {
@@ -205,11 +205,11 @@ function showRegister() {
 
 /* Tablet and up */
 @media screen and (min-width: 768px) {
-  .user-info {
+  .app-header .user-info {
     display: flex;
   }
 
-  .menu-button {
+  .app-header .menu-button {
     display: none;
   }
 }
