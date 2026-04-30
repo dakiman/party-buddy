@@ -82,6 +82,7 @@ export interface EventResponse {
   isPrivate: boolean
   createdAt: string
   updatedAt: string
+  creatorUsername: string
 }
 
 /** Legacy alias retained so existing imports of `Event` keep working. */
@@ -92,6 +93,28 @@ export type Event = EventResponse
  * Mirrors the BE `PostEventRequest` shape (note the request-side `lat`/`lng`).
  */
 export interface CreateEventPayload {
+  name: string
+  date: string         // ISO date "YYYY-MM-DD"
+  time?: string        // "HH:mm"
+  location?: {
+    lat: number
+    lng: number
+    locationDescription?: string
+  }
+  artists: Artist[]
+  drinks?: number[]
+  ingredients?: number[]
+  food?: string[]
+  isPrivate?: boolean
+}
+
+/**
+ * Event update payload — the body of PUT /events/{id}.
+ * Structurally identical to CreateEventPayload today. Kept as a separate type
+ * so future phases can make certain fields optional on edit without touching
+ * the create flow.
+ */
+export interface UpdateEventPayload {
   name: string
   date: string         // ISO date "YYYY-MM-DD"
   time?: string        // "HH:mm"
