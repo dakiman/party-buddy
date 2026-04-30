@@ -12,9 +12,20 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
-import { createEvent } from '@/services/event'
+import { createEvent } from '@/services/events'
 import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
+import type { CreateEventPayload } from '@/types'
+
+const STEP_KEYS = ['timeAndPlace', 'music', 'drinksAndFood', 'review'] as const
+type StepKey = typeof STEP_KEYS[number]
+
+const STEP_LABEL: Record<StepKey, string> = {
+  timeAndPlace: 'Time & Place',
+  music: 'Music',
+  drinksAndFood: 'Drinks & Food',
+  review: 'Review',
+}
 
 const visible = ref(false)
 const timeAndPlaceStep = ref()
@@ -23,51 +34,27 @@ const toast = useToast()
 const loading = ref(false)
 const router = useRouter()
 
-// Generate step values based on enabled steps
-const getStepValue = (baseValue: number) => {
-  // For dynamic step values based on enabled/disabled steps
-  let adjustedValue = baseValue
-  
-  // If music is disabled and we're after the Time & Place step (which is always step 1)
-  if (!wizardStore.formData.enabledSteps.music && baseValue > 1) {
-    adjustedValue--
-  }
-  
-  // If drinks & food is disabled and we're after the Music step (which would be step 2 if enabled)
-  if (!wizardStore.formData.enabledSteps.drinksAndFood) {
-    const musicStep = wizardStore.formData.enabledSteps.music ? 2 : 1
-    if (baseValue > musicStep) {
-      adjustedValue--
-    }
-  }
-  
-  return String(adjustedValue)
+/**
+ * The ordered list of steps actually visible in the current wizard run.
+ * `timeAndPlace` and `review` are mandatory; `music` and `drinksAndFood` are
+ * optional and toggled in the Time & Place step's checkboxes.
+ */
+const activeSteps = computed<StepKey[]>(() => {
+  const steps: StepKey[] = ['timeAndPlace']
+  if (wizardStore.formData.enabledSteps.music) steps.push('music')
+  if (wizardStore.formData.enabledSteps.drinksAndFood) steps.push('drinksAndFood')
+  steps.push('review')
+  return steps
+})
+
+function nextStep(current: StepKey): StepKey {
+  const idx = activeSteps.value.indexOf(current)
+  return activeSteps.value[Math.min(idx + 1, activeSteps.value.length - 1)]
 }
 
-// Function to determine the next step
-const getNextStep = (currentStep: string) => {
-  const current = parseInt(currentStep)
-  
-  if (current === 1) {
-    // From Time & Place
-    if (wizardStore.formData.enabledSteps.music) {
-      return '2' // Go to Music
-    } else if (wizardStore.formData.enabledSteps.drinksAndFood) {
-      return '2' // Go to Drinks & Food (which is now step 2)
-    } else {
-      return '2' // Go to Review (which is now step 2)
-    }
-  } else if (current === 2) {
-    // From either Music or Drinks & Food or directly to Review
-    if (wizardStore.formData.enabledSteps.music && wizardStore.formData.enabledSteps.drinksAndFood) {
-      return '3' // Go to Drinks & Food
-    } else {
-      return '3' // Go to Review
-    }
-  } else {
-    // From Drinks & Food
-    return '4' // Go to Review
-  }
+function prevStep(current: StepKey): StepKey {
+  const idx = activeSteps.value.indexOf(current)
+  return activeSteps.value[Math.max(idx - 1, 0)]
 }
 
 const show = () => {
@@ -83,39 +70,44 @@ const handleFinish = async () => {
   try {
     loading.value = true
 
-    // Format the data according to the API requirements
-    const eventData = {
+    const payload: CreateEventPayload = {
       name: wizardStore.formData.name,
       isPrivate: wizardStore.formData.isPrivate,
-      date: wizardStore.formData.date?.toISOString().split('T')[0],
-      time: wizardStore.formData.time?.toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      location: wizardStore.formData.location ? {
-        lat: wizardStore.formData.location.lat,
-        lng: wizardStore.formData.location.lng,
-        locationDescription: wizardStore.formData.locationDescription
-      } : null,
-      artists: wizardStore.formData.enabledSteps.music ? wizardStore.formData.artists.map(artist => ({
-        id: artist.id,
-        name: artist.name,
-        images: artist.images,
-        genres: artist.genres,
-        spotifyUrl: artist.spotifyUrl
-      })) : [],
-      drinks: [], // Now an empty array
-      ingredients: wizardStore.formData.enabledSteps.drinksAndFood ? wizardStore.formData.drinks.map(drink => drink.id) : [], // Map drinks to ingredients
-      food: wizardStore.formData.enabledSteps.drinksAndFood ? wizardStore.formData.food : []
+      date: wizardStore.formData.date
+        ? wizardStore.formData.date.toISOString().split('T')[0]
+        : '',
+      time: wizardStore.formData.time
+        ? wizardStore.formData.time.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : undefined,
+      location: wizardStore.formData.location
+        ? {
+            lat: wizardStore.formData.location.lat,
+            lng: wizardStore.formData.location.lng,
+            locationDescription: wizardStore.formData.locationDescription,
+          }
+        : undefined,
+      artists: wizardStore.formData.enabledSteps.music
+        ? wizardStore.formData.artists
+        : [],
+      drinks: [],
+      ingredients: wizardStore.formData.enabledSteps.drinksAndFood
+        ? wizardStore.formData.drinks.map(drink => Number(drink.id))
+        : [],
+      food: wizardStore.formData.enabledSteps.drinksAndFood
+        ? wizardStore.formData.food
+        : [],
     }
 
-    await createEvent(eventData)
+    await createEvent(payload)
     toast.add({
       severity: 'success',
       summary: 'Event Created!',
       detail: 'Your event has been created successfully.',
-      life: 3000
+      life: 3000,
     })
     close()
     router.push('/')
@@ -124,7 +116,7 @@ const handleFinish = async () => {
       severity: 'error',
       summary: 'Creation Failed',
       detail: 'Unable to create Event currently. Please try again later.',
-      life: 5000
+      life: 5000,
     })
   } finally {
     loading.value = false
@@ -132,7 +124,7 @@ const handleFinish = async () => {
 }
 
 defineExpose({
-  show
+  show,
 })
 </script>
 
@@ -142,26 +134,22 @@ defineExpose({
       <h2 class="wizard-title">Create New Event</h2>
     </template>
 
-    <Stepper value="1" linear id="stepper">
+    <Stepper value="timeAndPlace" linear id="stepper">
       <StepList>
-        <Step value="1">Time & Place</Step>
-        <Step v-if="wizardStore.formData.enabledSteps.music" value="2">Music</Step>
-        <Step v-if="wizardStore.formData.enabledSteps.drinksAndFood" 
-             :value="wizardStore.formData.enabledSteps.music ? '3' : '2'">
-          Drinks & Food
+        <Step v-for="key in activeSteps" :key="key" :value="key">
+          {{ STEP_LABEL[key] }}
         </Step>
-        <Step :value="getStepValue(4)">Review</Step>
       </StepList>
 
       <StepPanels>
-        <!-- Time & Place Step (always included) -->
-        <StepPanel v-slot="{ activateCallback }" value="1">
+        <!-- Time & Place — always present -->
+        <StepPanel v-slot="{ activateCallback }" value="timeAndPlace">
           <TimeAndPlaceStep ref="timeAndPlaceStep" />
           <div class="wizard-actions">
-            <div></div> <!-- Empty div for spacing -->
+            <div></div>
             <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => {
               if (timeAndPlaceStep?.isValid) {
-                activateCallback(getNextStep('1'))
+                activateCallback(nextStep('timeAndPlace'))
               } else {
                 timeAndPlaceStep?.setTouched()
               }
@@ -169,42 +157,29 @@ defineExpose({
           </div>
         </StepPanel>
 
-        <!-- Music Step (optional) -->
-        <StepPanel v-if="wizardStore.formData.enabledSteps.music" v-slot="{ activateCallback }" value="2">
+        <!-- Music — optional -->
+        <StepPanel v-if="wizardStore.formData.enabledSteps.music" v-slot="{ activateCallback }" value="music">
           <MusicStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback('1')" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" 
-                   @click="() => activateCallback(wizardStore.formData.enabledSteps.drinksAndFood ? '3' : getStepValue(4))" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('music'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('music'))" />
           </div>
         </StepPanel>
 
-        <!-- Drinks & Food Step (optional) -->
-        <StepPanel v-if="wizardStore.formData.enabledSteps.drinksAndFood" 
-                  v-slot="{ activateCallback }" 
-                  :value="wizardStore.formData.enabledSteps.music ? '3' : '2'">
+        <!-- Drinks & Food — optional -->
+        <StepPanel v-if="wizardStore.formData.enabledSteps.drinksAndFood" v-slot="{ activateCallback }" value="drinksAndFood">
           <DrinksAndFoodStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" 
-                   @click="() => activateCallback(wizardStore.formData.enabledSteps.music ? '2' : '1')" />
-            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" 
-                   @click="() => activateCallback(getStepValue(4))" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('drinksAndFood'))" />
+            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="() => activateCallback(nextStep('drinksAndFood'))" />
           </div>
         </StepPanel>
 
-        <!-- Review Step (always included, but with variable value) -->
-        <StepPanel v-slot="{ activateCallback }" :value="getStepValue(4)">
+        <!-- Review — always present -->
+        <StepPanel v-slot="{ activateCallback }" value="review">
           <ReviewStep />
           <div class="wizard-actions">
-            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => {
-              if (wizardStore.formData.enabledSteps.drinksAndFood) {
-                activateCallback(wizardStore.formData.enabledSteps.music ? '3' : '2')
-              } else if (wizardStore.formData.enabledSteps.music) {
-                activateCallback('2')
-              } else {
-                activateCallback('1')
-              }
-            }" />
+            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('review'))" />
             <Button label="Finish" severity="success" icon="pi pi-check" :loading="loading" @click="handleFinish" />
           </div>
         </StepPanel>

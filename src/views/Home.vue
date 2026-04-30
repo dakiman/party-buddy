@@ -3,12 +3,13 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
-import api from '@/services/api'
+import { listMyEvents } from '@/services/events'
 import { useAuthStore } from '@/stores/auth'
+import type { EventResponse } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const events = ref([])
+const events = ref<EventResponse[]>([])
 const loading = ref(true)
 const error = ref(false)
 
@@ -17,10 +18,9 @@ const emit = defineEmits(['showLogin', 'showRegister'])
 async function fetchEvents() {
   loading.value = true
   error.value = false
-  
+
   try {
-    const response = await api.get('/events', { params: { createdBy: 'me' } })
-    events.value = response.data
+    events.value = await listMyEvents()
   } catch (err) {
     console.error('Failed to fetch events:', err)
     error.value = true
@@ -29,7 +29,6 @@ async function fetchEvents() {
   }
 }
 
-// Watch for authentication state changes
 watch(() => authStore.isAuthenticated, (isAuthenticated) => {
   if (isAuthenticated) {
     fetchEvents()
@@ -44,7 +43,7 @@ onMounted(async () => {
     loading.value = false
     return
   }
-  
+
   await fetchEvents()
 })
 

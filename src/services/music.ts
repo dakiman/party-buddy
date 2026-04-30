@@ -1,9 +1,22 @@
 import api from './api'
-import type { Artist } from '@/stores/wizard'
+import type { Artist } from '@/types'
+
+interface SearchArtistsResponse {
+  artists: Artist[]
+}
 
 export async function searchArtists(name: string): Promise<Artist[]> {
-  const response = await api.get('/music/artists', {
-    params: { name }
+  const { data } = await api.get<SearchArtistsResponse>('/music/artists', {
+    params: { name },
   })
-  return response.data.artists
-} 
+  return data.artists
+}
+
+interface GenresResponse {
+  genres: string[]
+}
+
+export async function getGenres(): Promise<string[]> {
+  const { data } = await api.get<GenresResponse>('/music/genres')
+  return data.genres
+}
