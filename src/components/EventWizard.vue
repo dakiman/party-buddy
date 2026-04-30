@@ -12,10 +12,16 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
-import { createEvent } from '@/services/events'
+import { createEvent, updateEvent } from '@/services/events'
 import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
-import type { CreateEventPayload } from '@/types'
+import type { CreateEventPayload, EventResponse, UpdateEventPayload } from '@/types'
+
+const props = withDefaults(defineProps<{
+  initialEvent?: EventResponse
+}>(), {
+  initialEvent: undefined,
+})
 
 const STEP_KEYS = ['timeAndPlace', 'music', 'drinksAndFood', 'review'] as const
 type StepKey = typeof STEP_KEYS[number]
@@ -34,11 +40,8 @@ const toast = useToast()
 const loading = ref(false)
 const router = useRouter()
 
-/**
- * The ordered list of steps actually visible in the current wizard run.
- * `timeAndPlace` and `review` are mandatory; `music` and `drinksAndFood` are
- * optional and toggled in the Time & Place step's checkboxes.
- */
+const isEditMode = computed(() => props.initialEvent !== undefined)
+
 const activeSteps = computed<StepKey[]>(() => {
   const steps: StepKey[] = ['timeAndPlace']
   if (wizardStore.formData.enabledSteps.music) steps.push('music')
@@ -57,7 +60,30 @@ function prevStep(current: StepKey): StepKey {
   return activeSteps.value[Math.max(idx - 1, 0)]
 }
 
+function seedStoreFromEvent(event: EventResponse): void {
+  wizardStore.updateFormData({
+    name: event.name,
+    date: event.date ? new Date(event.date) : null,
+    time: event.time ? new Date(`1970-01-01T${event.time}`) : null,
+    location: event.location
+      ? { lat: event.location.latitude, lng: event.location.longitude }
+      : null,
+    locationDescription: event.location?.description ?? '',
+    artists: event.artists,
+    drinks: [],  // legacy field — always empty, same as create
+    food: event.food ?? [],
+    isPrivate: event.isPrivate,
+    enabledSteps: {
+      music: (event.artists?.length ?? 0) > 0,
+      drinksAndFood: (event.food?.length ?? 0) > 0,
+    },
+  })
+}
+
 const show = () => {
+  if (props.initialEvent) {
+    seedStoreFromEvent(props.initialEvent)
+  }
   visible.value = true
 }
 
@@ -70,52 +96,96 @@ const handleFinish = async () => {
   try {
     loading.value = true
 
-    const payload: CreateEventPayload = {
-      name: wizardStore.formData.name,
-      isPrivate: wizardStore.formData.isPrivate,
-      date: wizardStore.formData.date
-        ? wizardStore.formData.date.toISOString().split('T')[0]
-        : '',
-      time: wizardStore.formData.time
-        ? wizardStore.formData.time.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : undefined,
-      location: wizardStore.formData.location
-        ? {
-            lat: wizardStore.formData.location.lat,
-            lng: wizardStore.formData.location.lng,
-            locationDescription: wizardStore.formData.locationDescription,
-          }
-        : undefined,
-      artists: wizardStore.formData.enabledSteps.music
-        ? wizardStore.formData.artists
-        : [],
-      drinks: [],
-      ingredients: wizardStore.formData.enabledSteps.drinksAndFood
-        ? wizardStore.formData.drinks.map(drink => Number(drink.id))
-        : [],
-      food: wizardStore.formData.enabledSteps.drinksAndFood
-        ? wizardStore.formData.food
-        : [],
+    if (isEditMode.value && props.initialEvent) {
+      // ── Edit mode ─────────────────────────────────────────────────────
+      const payload: UpdateEventPayload = {
+        name: wizardStore.formData.name,
+        isPrivate: wizardStore.formData.isPrivate,
+        date: wizardStore.formData.date
+          ? wizardStore.formData.date.toISOString().split('T')[0]
+          : '',
+        time: wizardStore.formData.time
+          ? wizardStore.formData.time.toLocaleTimeString('en-US', {
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : undefined,
+        location: wizardStore.formData.location
+          ? {
+              lat: wizardStore.formData.location.lat,
+              lng: wizardStore.formData.location.lng,
+              locationDescription: wizardStore.formData.locationDescription,
+            }
+          : undefined,
+        artists: wizardStore.formData.enabledSteps.music
+          ? wizardStore.formData.artists
+          : [],
+        drinks: [],
+        ingredients: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.drinks.map(drink => Number(drink.id))
+          : [],
+        food: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.food
+          : [],
+      }
+      await updateEvent(props.initialEvent.id, payload)
+      toast.add({
+        severity: 'success',
+        summary: 'Event Updated!',
+        detail: 'Your event has been updated successfully.',
+        life: 3000,
+      })
+      close()
+      router.push(`/events/${props.initialEvent.id}`)
+    } else {
+      // ── Create mode ───────────────────────────────────────────────────
+      const payload: CreateEventPayload = {
+        name: wizardStore.formData.name,
+        isPrivate: wizardStore.formData.isPrivate,
+        date: wizardStore.formData.date
+          ? wizardStore.formData.date.toISOString().split('T')[0]
+          : '',
+        time: wizardStore.formData.time
+          ? wizardStore.formData.time.toLocaleTimeString('en-US', {
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : undefined,
+        location: wizardStore.formData.location
+          ? {
+              lat: wizardStore.formData.location.lat,
+              lng: wizardStore.formData.location.lng,
+              locationDescription: wizardStore.formData.locationDescription,
+            }
+          : undefined,
+        artists: wizardStore.formData.enabledSteps.music
+          ? wizardStore.formData.artists
+          : [],
+        drinks: [],
+        ingredients: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.drinks.map(drink => Number(drink.id))
+          : [],
+        food: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.food
+          : [],
+      }
+      await createEvent(payload)
+      toast.add({
+        severity: 'success',
+        summary: 'Event Created!',
+        detail: 'Your event has been created successfully.',
+        life: 3000,
+      })
+      close()
+      router.push('/')
     }
-
-    await createEvent(payload)
-    toast.add({
-      severity: 'success',
-      summary: 'Event Created!',
-      detail: 'Your event has been created successfully.',
-      life: 3000,
-    })
-    close()
-    router.push('/')
-  } catch (error) {
+  } catch {
     toast.add({
       severity: 'error',
-      summary: 'Creation Failed',
-      detail: 'Unable to create Event currently. Please try again later.',
+      summary: isEditMode.value ? 'Update Failed' : 'Creation Failed',
+      detail: 'Something went wrong. Please try again later.',
       life: 5000,
     })
   } finally {
@@ -131,7 +201,7 @@ defineExpose({
 <template>
   <Dialog v-model:visible="visible" modal :style="{ width: '90vw', maxWidth: '800px' }" :closable="true" @hide="close">
     <template #header>
-      <h2 class="wizard-title">Create New Event</h2>
+      <h2 class="wizard-title">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h2>
     </template>
 
     <Stepper value="timeAndPlace" linear id="stepper">
