@@ -8,6 +8,7 @@ import { definePreset } from "@primevue/themes";
 import "primeicons/primeicons.css";
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
+import ConfirmationService from "primevue/confirmationservice";
 
 const MyPreset = definePreset(Lara, {
   semantic: {
@@ -90,5 +91,6 @@ app.use(PrimeVue, {
   },
 });
 app.use(ToastService);
+app.use(ConfirmationService);
 app.component("Toast", Toast);
 app.mount("#app");
