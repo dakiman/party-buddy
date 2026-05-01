@@ -32,6 +32,13 @@ export interface Artist {
   popularity?: number
 }
 
+export interface Track {
+  id: string
+  name: string
+  albumImageUrl: string | null
+  durationMs: number | null
+}
+
 // ─── Drinks & Ingredients ──────────────────────────────────────────────────
 
 export interface Drink {
