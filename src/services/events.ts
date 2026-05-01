@@ -1,5 +1,5 @@
 import api from './api'
-import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload } from '@/types'
+import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload, PaginatedEvents, ShareLink } from '@/types'
 
 // Wire-level shape of an Event as returned by the BE — pre-normalization.
 // Differs from EventResponse only in the `artists[].spotifyId` field name.
@@ -84,4 +84,48 @@ export async function updateEvent(id: number, payload: UpdateEventPayload): Prom
 
 export async function deleteEvent(id: number): Promise<void> {
   await api.delete(`/events/${id}`)
+}
+
+interface RawPaginatedEvents {
+  content: RawEventResponse[]
+  totalElements: number
+  number: number  // Spring's "current page index"
+  size: number
+}
+
+export async function issueShareLink(id: number): Promise<ShareLink> {
+  const { data } = await api.post<ShareLink>(`/events/${id}/share`)
+  return data
+}
+
+export async function rotateShareLink(id: number): Promise<ShareLink> {
+  const { data } = await api.post<ShareLink>(`/events/${id}/share/rotate`)
+  return data
+}
+
+export async function getEventByShareToken(token: string): Promise<EventResponse> {
+  const { data } = await api.get<RawEventResponse>(`/events/share/${encodeURIComponent(token)}`)
+  return normalizeEvent(data)
+}
+
+export async function listPublicEvents(params: {
+  page?: number
+  size?: number
+  q?: string
+  includePast?: boolean
+}): Promise<PaginatedEvents> {
+  const { data } = await api.get<RawPaginatedEvents>('/events/public', {
+    params: {
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+      q: params.q || undefined,
+      includePast: params.includePast ?? false,
+    },
+  })
+  return {
+    content: data.content.map(normalizeEvent),
+    totalElements: data.totalElements,
+    page: data.number,
+    size: data.size,
+  }
 }
