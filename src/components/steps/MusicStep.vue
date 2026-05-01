@@ -82,6 +82,13 @@ const toggleArtistExpansion = async (artist: Artist) => {
     }
 }
 
+const onRowKeydown = (event: KeyboardEvent, artist: Artist) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        toggleArtistExpansion(artist)
+    }
+}
+
 const playTrack = (track: Track) => {
     currentTrackId.value = track.id
 }
@@ -183,6 +190,40 @@ onBeforeUnmount(() => {
                 </template>
             </AutoComplete>
         </div>
+
+        <ul v-if="selectedArtists.length > 0" class="artist-list">
+            <li v-for="artist in selectedArtists" :key="artist.id" class="artist-row-wrapper">
+                <div
+                    class="artist-row"
+                    :class="{ 'artist-row-expanded': expandedArtistId === artist.id }"
+                    role="button"
+                    tabindex="0"
+                    :aria-expanded="expandedArtistId === artist.id"
+                    @click="toggleArtistExpansion(artist)"
+                    @keydown.enter.prevent="onRowKeydown($event, artist)"
+                    @keydown.space.prevent="onRowKeydown($event, artist)">
+                    <img
+                        v-if="artist.images[2]?.url ?? artist.images[0]?.url"
+                        :src="artist.images[2]?.url ?? artist.images[0]?.url"
+                        class="artist-row-image" :alt="artist.name" />
+                    <div v-else class="artist-row-image artist-row-image-placeholder"><i class="pi pi-user" /></div>
+                    <div class="artist-row-meta">
+                        <span class="artist-row-name">{{ artist.name }}</span>
+                        <div v-if="artist.genres && artist.genres.length > 0" class="artist-row-genres">
+                            <Tag v-for="genre in artist.genres.slice(0, 2)" :key="genre" :value="genre" />
+                        </div>
+                    </div>
+                    <i class="pi pi-chevron-down artist-row-chevron" aria-hidden="true" />
+                    <button
+                        type="button"
+                        class="artist-row-remove"
+                        :aria-label="`Remove ${artist.name}`"
+                        @click.stop="removeArtist(artist)">
+                        <i class="pi pi-times" aria-hidden="true" />
+                    </button>
+                </div>
+            </li>
+        </ul>
 
         <div v-if="expandedArtist" class="tracks-panel">
             <div class="tracks-header">
@@ -396,6 +437,143 @@ onBeforeUnmount(() => {
 
 .p-autocomplete-token-icon {
     display: none;
+}
+
+/* Selected-artist accordion list */
+.artist-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.artist-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--p-surface-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--p-text-color);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+}
+
+.artist-row:hover,
+.artist-row:focus-visible {
+    background: var(--p-surface-hover);
+    border-color: var(--p-primary-color);
+    outline: none;
+}
+
+.artist-row-expanded {
+    border-color: var(--p-primary-color);
+}
+
+.artist-row-image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.artist-row-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--p-surface-border);
+    color: var(--p-text-muted-color, #888);
+}
+
+.artist-row-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.artist-row-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artist-row-genres {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.artist-row-genres .p-tag {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.6rem;
+}
+
+.artist-row-chevron {
+    font-size: 0.875rem;
+    color: var(--p-text-muted-color, #888);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.artist-row-expanded .artist-row-chevron {
+    transform: rotate(180deg);
+}
+
+.artist-row-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--p-text-muted-color, #888);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s, background 0.15s;
+    flex-shrink: 0;
+}
+
+.artist-row-remove:hover,
+.artist-row-remove:focus-visible {
+    opacity: 1;
+    background: var(--p-surface-hover);
+    outline: none;
+}
+
+.artist-row-expansion {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--p-surface-border);
+    border-radius: 8px;
+    background: var(--p-surface-card, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.artist-row-expansion-header {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--p-text-color);
+}
+
+@media (max-width: 767px) {
+    .artist-row-image { width: 2.5rem; height: 2.5rem; }
+    .artist-row-name { font-size: 0.875rem; }
 }
 
 .p-dialog-header {
