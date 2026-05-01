@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getEvent, deleteEvent } from '@/services/events'
+import { getEventByShareToken, deleteEvent } from '@/services/events'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -13,33 +13,45 @@ const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
 const confirm = useConfirm()
+
 const loading = ref(true)
+const notFound = ref(false)
 const event = ref<EventResponse | null>(null)
 
 const canEdit = computed(
   () => !!event.value && authStore.user?.username === event.value.creatorUsername,
 )
 
-onMounted(async () => {
+async function load(token: string) {
+  loading.value = true
+  notFound.value = false
+  event.value = null
   try {
-    const id = Number(route.params.id)
-    event.value = await getEvent(id)
-  } catch {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to load event details',
-      life: 3000,
-    })
+    event.value = await getEventByShareToken(token)
+  } catch (e: unknown) {
+    // 404 is the "revoked or unknown" case — render the explicit empty state.
+    // Any other error falls into a generic toast.
+    const status = (e as { response?: { status?: number } })?.response?.status
+    if (status === 404) {
+      notFound.value = true
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load shared event.',
+        life: 3000,
+      })
+    }
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(() => load(String(route.params.token)))
+watch(() => route.params.token, (t) => load(String(t)))
 
 function goToEdit() {
-  if (event.value) {
-    router.push(`/events/${event.value.id}/edit`)
-  }
+  if (event.value) router.push(`/events/${event.value.id}/edit`)
 }
 
 function confirmDelete() {
@@ -74,10 +86,8 @@ function confirmDelete() {
 </script>
 
 <template>
-  <div class="event-view">
-    <div v-if="loading" class="loading-state">
-      Loading event details...
-    </div>
+  <div class="shared-event">
+    <div v-if="loading" class="state">Loading shared event…</div>
 
     <EventDetails
       v-else-if="event"
@@ -87,21 +97,22 @@ function confirmDelete() {
       @delete="confirmDelete"
     />
 
-    <div v-else class="error-state">
-      Event not found
+    <div v-else-if="notFound" class="state">
+      This share link has been revoked or doesn't exist.
     </div>
+
+    <div v-else class="state">Could not load event.</div>
   </div>
 </template>
 
 <style>
-.event-view {
+.shared-event {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
 }
 
-.loading-state,
-.error-state {
+.shared-event .state {
   text-align: center;
   padding: 3rem;
   color: var(--p-text-secondary-color);

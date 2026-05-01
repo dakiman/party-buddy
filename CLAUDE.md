@@ -89,6 +89,16 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 | New API call            | Add a method to (or create) `src/services/<resource>.ts` using the shared `api` axios instance                       |
 | New shared type         | `src/types/index.ts` (or split into focused files when it grows)                                                     |
 
+### Phase 3 — Sharing & discovery (added 2026-05-01)
+
+- New routes:
+  - `/discover` — public events feed, no auth.
+  - `/shared/:token` — token-keyed event view, no auth.
+- `EventDetails.vue` was extracted from `EventView.vue` so it can be reused by `SharedEvent.vue`. Both views are thin loaders that hand the `EventResponse` to `EventDetails` along with a `canEdit` boolean. **When adding new event-detail UI, edit `EventDetails.vue`, not `EventView.vue`.**
+- `ShareDialog.vue` lives behind a "Share" button in `EventDetails`'s creator-only action row. It calls `POST /events/{id}/share` lazily on first open; "Regenerate link" calls `POST /events/{id}/share/rotate`. QR is rendered client-side via the `qrcode` npm package into a `<canvas>`.
+- `EventCard.vue` is the discovery-feed card. Cards link to `/events/:id` (which is public on the BE for non-private events).
+- Discover URL state (search query, page, past-events toggle) is synced to the URL via `router.replace({ query })` — back-button + shareable-search work.
+
 ## Roadmap
 
 `/home/dakiman/projects/party-docs/specs/2026-04-28-party-app-roadmap-design.md`
