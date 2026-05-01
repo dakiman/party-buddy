@@ -66,6 +66,10 @@ function showRegister() {
         </router-link>
       </div>
 
+      <nav class="header-nav">
+        <router-link to="/discover" class="nav-link">Discover</router-link>
+      </nav>
+
       <div class="header-actions">
         <template v-if="isLoggedIn">
           <Button
@@ -212,5 +216,26 @@ function showRegister() {
   .app-header .menu-button {
     display: none;
   }
+}
+
+.header-nav {
+  display: flex;
+  gap: 1rem;
+  margin-left: 1.5rem;
+  flex: 1;
+}
+
+.header-nav .nav-link {
+  color: var(--p-text-secondary-color);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+}
+
+.header-nav .nav-link:hover,
+.header-nav .nav-link.router-link-active {
+  color: var(--p-text-color);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 </style> 
