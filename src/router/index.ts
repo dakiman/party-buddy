@@ -18,6 +18,10 @@ const router = createRouter({
     {
       path: '/events/:id/edit',
       component: () => import('@/views/EditEvent.vue')
+    },
+    {
+      path: '/shared/:token',
+      component: () => import('@/views/SharedEvent.vue')
     }
   ]
 })
