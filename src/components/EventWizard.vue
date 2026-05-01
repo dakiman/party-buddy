@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, provide, readonly } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Stepper from 'primevue/stepper'
@@ -40,6 +40,7 @@ const toast = useToast()
 const loading = ref(false)
 const router = useRouter()
 const currentStep = ref<StepKey>('timeAndPlace')
+provide('currentWizardStep', readonly(currentStep))
 
 watch(currentStep, () => {
   nextTick(() => {
