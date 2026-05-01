@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
@@ -12,6 +12,8 @@ const wizardStore = useWizardStore()
 const searchResults = ref<Artist[]>([])
 const selectedArtists = ref<Artist[]>([...wizardStore.formData.artists])
 const loading = ref(false)
+const searchQuery = ref('')
+const autoCompleteRef = ref<InstanceType<typeof AutoComplete> | null>(null)
 
 const expandedArtistId = ref<string | null>(null)
 const topTracksByArtist = ref<Record<string, Track[]>>({})
@@ -37,6 +39,18 @@ const search = async (event: { query: string }) => {
     } finally {
         loading.value = false
     }
+}
+
+const onArtistSelect = async (event: { value: Artist }) => {
+    if (selectedArtists.value.some(a => a.id === event.value.id)) return
+    selectedArtists.value = [...selectedArtists.value, event.value]
+    searchQuery.value = ''
+    searchResults.value = []
+    await nextTick()
+    // PrimeVue AutoComplete exposes the inner input via its root element; query it directly.
+    const root = (autoCompleteRef.value as unknown as { $el?: HTMLElement } | null)?.$el
+    const input = root?.querySelector<HTMLInputElement>('input')
+    input?.focus()
 }
 
 const removeArtist = (artist: Artist) => {
@@ -141,9 +155,18 @@ onBeforeUnmount(() => {
         <h3 class="text-xl mb-4">Add some music</h3>
         <div class="form-field">
             <label>Search for artists</label>
-            <AutoComplete v-model="selectedArtists" :suggestions="searchResults" @complete="search" :multiple="true"
-                :delay="300" :loading="loading" optionLabel="name" placeholder="Type to search artists..."
-                appendTo="body" class="w-full">
+            <AutoComplete
+                ref="autoCompleteRef"
+                v-model="searchQuery"
+                :suggestions="searchResults"
+                @complete="search"
+                @item-select="onArtistSelect"
+                :delay="300"
+                :loading="loading"
+                optionLabel="name"
+                placeholder="Type to search artists..."
+                appendTo="body"
+                class="w-full">
                 <template #option="slotProps">
                     <div class="artist-option">
                         <div class="artist-info">
@@ -156,17 +179,6 @@ onBeforeUnmount(() => {
                                 {{ genre }}
                             </Tag>
                         </div>
-                    </div>
-                </template>
-
-                <template #chip="slotProps">
-                    <div class="artist-chip"
-                        :class="{ 'artist-chip-active': expandedArtistId === slotProps.value.id }"
-                        @click="toggleArtistExpansion(slotProps.value)">
-                        <img :src="slotProps.value.images[2]?.url ?? slotProps.value.images[0]?.url"
-                            class="chip-image" :alt="slotProps.value.name" />
-                        <span>{{ slotProps.value.name }}</span>
-                        <i class="pi pi-times remove-icon" @click.stop="removeArtist(slotProps.value)" />
                     </div>
                 </template>
             </AutoComplete>
