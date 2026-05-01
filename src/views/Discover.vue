@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import ToggleButton from 'primevue/togglebutton'
 import Paginator from 'primevue/paginator'
+import Skeleton from 'primevue/skeleton'
+import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { listPublicEvents } from '@/services/events'
 import EventCard from '@/components/EventCard.vue'
@@ -20,6 +22,7 @@ const page = ref<number>(typeof route.query.page === 'string' ? Number(route.que
 const showPast = ref<boolean>(route.query.showPast === 'true')
 
 const loading = ref(false)
+const errored = ref(false)
 const events = ref<EventResponse[]>([])
 const total = ref(0)
 
@@ -29,6 +32,7 @@ let currentRequestId = 0
 async function fetchPage() {
   const requestId = ++currentRequestId
   loading.value = true
+  errored.value = false
   try {
     const res = await listPublicEvents({
       page: page.value,
@@ -47,6 +51,7 @@ async function fetchPage() {
       detail: 'Failed to load events.',
       life: 3000,
     })
+    errored.value = true
   } finally {
     if (requestId === currentRequestId) loading.value = false
   }
@@ -86,7 +91,7 @@ function onPaginate(e: { page: number }) {
 const emptyMessage = computed(() => {
   if (loading.value) return ''
   if (q.value.trim()) return `No events match "${q.value}".`
-  return showPast.value ? 'No public events.' : 'No upcoming public events.'
+  return 'No public events yet.'
 })
 
 onMounted(fetchPage)
@@ -101,7 +106,19 @@ onMounted(fetchPage)
       <ToggleButton v-model="showPast" on-label="Past events" off-label="Past events" />
     </div>
 
-    <div v-if="loading" class="state">Loading…</div>
+    <div v-if="loading" class="card-grid" aria-label="Loading events">
+      <div v-for="n in 6" :key="n" class="skeleton-card">
+        <Skeleton width="60%" height="1.25rem" class="skeleton-title" />
+        <Skeleton width="40%" height="0.875rem" class="skeleton-meta" />
+        <Skeleton width="80%" height="0.875rem" class="skeleton-location" />
+        <Skeleton width="30%" height="0.75rem" class="skeleton-host" />
+      </div>
+    </div>
+
+    <div v-else-if="errored" class="state error-state">
+      <p>Failed to load events.</p>
+      <Button label="Retry" icon="pi pi-refresh" @click="fetchPage" />
+    </div>
 
     <div v-else-if="events.length === 0" class="state">{{ emptyMessage }}</div>
 
@@ -156,4 +173,16 @@ onMounted(fetchPage)
   padding: 3rem;
   color: var(--p-text-secondary-color);
 }
+
+.discover .skeleton-card {
+  background: var(--p-surface-card);
+  border: 1px solid var(--p-surface-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.discover .skeleton-title { margin-bottom: 0.25rem; }
 </style>
