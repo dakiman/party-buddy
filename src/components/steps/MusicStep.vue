@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
         </div>
 
         <ul v-if="selectedArtists.length > 0" class="artist-list">
-            <li v-for="artist in selectedArtists" :key="artist.id" class="artist-row-wrapper">
+            <li v-for="artist in selectedArtists" :key="artist.id">
                 <div
                     class="artist-row"
                     :class="{ 'artist-row-expanded': expandedArtistId === artist.id }"
