@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
@@ -100,18 +100,6 @@ const formatDuration = (ms: number | null): string => {
     const s = totalSec % 60
     return `${m}:${s.toString().padStart(2, '0')}`
 }
-
-const expandedArtist = computed<Artist | null>(() =>
-    selectedArtists.value.find(a => a.id === expandedArtistId.value) ?? null
-)
-
-const expandedTracks = computed<Track[]>(() =>
-    expandedArtistId.value ? (topTracksByArtist.value[expandedArtistId.value] ?? []) : []
-)
-
-const expandedLoading = computed<boolean>(() =>
-    expandedArtistId.value ? !!topTracksLoading.value[expandedArtistId.value] : false
-)
 
 const findSimilar = async () => {
     if (selectedArtists.value.length === 0) return
@@ -222,45 +210,38 @@ onBeforeUnmount(() => {
                         <i class="pi pi-times" aria-hidden="true" />
                     </button>
                 </div>
+                <div v-if="expandedArtistId === artist.id" class="artist-row-expansion">
+                    <div class="artist-row-expansion-header">Top tracks</div>
+                    <div v-if="topTracksLoading[artist.id]" class="tracks-loading">
+                        <Skeleton v-for="i in 4" :key="i" height="2.5rem" class="track-skeleton" />
+                    </div>
+                    <div v-else-if="(topTracksByArtist[artist.id]?.length ?? 0) === 0" class="tracks-empty">
+                        No tracks available for this artist.
+                    </div>
+                    <ul v-else class="track-list">
+                        <li v-for="track in (topTracksByArtist[artist.id] ?? []).slice(0, 5)" :key="track.id"
+                            class="track-row" :class="{ 'track-row-active': currentTrackId === track.id }">
+                            <img v-if="track.albumImageUrl" :src="track.albumImageUrl" class="track-cover" :alt="track.name" />
+                            <div v-else class="track-cover track-cover-placeholder"><i class="pi pi-image" /></div>
+                            <div class="track-meta">
+                                <span class="track-name">{{ track.name }}</span>
+                                <span class="track-duration">{{ formatDuration(track.durationMs) }}</span>
+                            </div>
+                            <Button :icon="currentTrackId === track.id ? 'pi pi-volume-up' : 'pi pi-play'"
+                                :severity="currentTrackId === track.id ? 'success' : 'secondary'"
+                                text rounded :aria-label="`Play ${track.name}`" @click.stop="playTrack(track)" />
+                        </li>
+                    </ul>
+
+                    <iframe v-if="currentTrackId"
+                        class="spotify-embed"
+                        :src="`https://open.spotify.com/embed/track/${currentTrackId}?theme=0`"
+                        width="100%" height="80" frameborder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                        loading="lazy" />
+                </div>
             </li>
         </ul>
-
-        <div v-if="expandedArtist" class="tracks-panel">
-            <div class="tracks-header">
-                <span>Top tracks — {{ expandedArtist.name }}</span>
-                <button type="button" class="close-tracks" @click="expandedArtistId = null; currentTrackId = null">
-                    <i class="pi pi-times" />
-                </button>
-            </div>
-
-            <div v-if="expandedLoading" class="tracks-loading">
-                <Skeleton v-for="i in 4" :key="i" height="2.5rem" class="track-skeleton" />
-            </div>
-            <div v-else-if="expandedTracks.length === 0" class="tracks-empty">
-                No tracks available for this artist.
-            </div>
-            <ul v-else class="track-list">
-                <li v-for="track in expandedTracks.slice(0, 5)" :key="track.id"
-                    class="track-row" :class="{ 'track-row-active': currentTrackId === track.id }">
-                    <img v-if="track.albumImageUrl" :src="track.albumImageUrl" class="track-cover" :alt="track.name" />
-                    <div v-else class="track-cover track-cover-placeholder"><i class="pi pi-image" /></div>
-                    <div class="track-meta">
-                        <span class="track-name">{{ track.name }}</span>
-                        <span class="track-duration">{{ formatDuration(track.durationMs) }}</span>
-                    </div>
-                    <Button :icon="currentTrackId === track.id ? 'pi pi-volume-up' : 'pi pi-play'"
-                        :severity="currentTrackId === track.id ? 'success' : 'secondary'"
-                        text rounded :aria-label="`Play ${track.name}`" @click="playTrack(track)" />
-                </li>
-            </ul>
-
-            <iframe v-if="currentTrackId"
-                class="spotify-embed"
-                :src="`https://open.spotify.com/embed/track/${currentTrackId}?theme=0`"
-                width="100%" height="80" frameborder="0"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                loading="lazy" />
-        </div>
 
         <div v-if="selectedArtists.length > 0" class="similar-section">
             <div class="similar-actions">
@@ -349,53 +330,6 @@ onBeforeUnmount(() => {
 .genre-pills .p-tag {
     padding: 0.1rem 0.5rem;
     font-size: 0.60rem;
-}
-
-.artist-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.125rem 0.5rem 0.125rem 0.125rem;
-    background-color: var(--p-primary-color);
-    color: var(--primary-color-text);
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: filter 0.15s;
-}
-
-.artist-chip:hover {
-    filter: brightness(1.1);
-}
-
-.artist-chip-active {
-    outline: 2px solid var(--p-primary-color);
-    outline-offset: 2px;
-}
-
-.chip-image {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.remove-icon {
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: 0.25rem;
-    margin-left: 0.25rem;
-    color: var(--primary-color-text);
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remove-icon:hover {
-    opacity: 1;
 }
 
 .p-autocomplete {
@@ -588,37 +522,6 @@ onBeforeUnmount(() => {
     color: var(--p-text-color);
 }
 
-/* Tracks panel */
-.tracks-panel {
-    border: 1px solid var(--p-surface-border);
-    border-radius: 8px;
-    padding: 0.75rem;
-    background: var(--p-surface-card, transparent);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.tracks-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--p-text-color);
-}
-
-.close-tracks {
-    background: transparent;
-    border: none;
-    color: var(--p-text-color);
-    cursor: pointer;
-    opacity: 0.6;
-    padding: 0.25rem;
-}
-
-.close-tracks:hover { opacity: 1; }
-
 .tracks-loading {
     display: flex;
     flex-direction: column;
@@ -786,11 +689,6 @@ onBeforeUnmount(() => {
     .artist-image {
         width: 2rem;
         height: 2rem;
-    }
-
-    .chip-image {
-        width: 1rem;
-        height: 1rem;
     }
 
     .similar-grid {
