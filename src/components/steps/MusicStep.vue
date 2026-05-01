@@ -199,9 +199,9 @@ onBeforeUnmount(() => {
                     role="button"
                     tabindex="0"
                     :aria-expanded="expandedArtistId === artist.id"
+                    :aria-label="`${expandedArtistId === artist.id ? 'Collapse' : 'Expand'} top tracks for ${artist.name}`"
                     @click="toggleArtistExpansion(artist)"
-                    @keydown.enter.prevent="onRowKeydown($event, artist)"
-                    @keydown.space.prevent="onRowKeydown($event, artist)">
+                    @keydown="onRowKeydown($event, artist)">
                     <img
                         v-if="artist.images[2]?.url ?? artist.images[0]?.url"
                         :src="artist.images[2]?.url ?? artist.images[0]?.url"
