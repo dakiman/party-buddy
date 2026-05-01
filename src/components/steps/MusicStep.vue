@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
@@ -12,6 +12,8 @@ const wizardStore = useWizardStore()
 const searchResults = ref<Artist[]>([])
 const selectedArtists = ref<Artist[]>([...wizardStore.formData.artists])
 const loading = ref(false)
+const searchQuery = ref('')
+const autoCompleteRef = ref<InstanceType<typeof AutoComplete> | null>(null)
 
 const expandedArtistId = ref<string | null>(null)
 const topTracksByArtist = ref<Record<string, Track[]>>({})
@@ -37,6 +39,18 @@ const search = async (event: { query: string }) => {
     } finally {
         loading.value = false
     }
+}
+
+const onArtistSelect = async (event: { value: Artist }) => {
+    if (selectedArtists.value.some(a => a.id === event.value.id)) return
+    selectedArtists.value = [...selectedArtists.value, event.value]
+    searchQuery.value = ''
+    searchResults.value = []
+    await nextTick()
+    // PrimeVue AutoComplete exposes the inner input via its root element; query it directly.
+    const root = (autoCompleteRef.value as unknown as { $el?: HTMLElement } | null)?.$el
+    const input = root?.querySelector<HTMLInputElement>('input')
+    input?.focus()
 }
 
 const removeArtist = (artist: Artist) => {
@@ -68,6 +82,13 @@ const toggleArtistExpansion = async (artist: Artist) => {
     }
 }
 
+const onRowKeydown = (event: KeyboardEvent, artist: Artist) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        toggleArtistExpansion(artist)
+    }
+}
+
 const playTrack = (track: Track) => {
     currentTrackId.value = track.id
 }
@@ -79,18 +100,6 @@ const formatDuration = (ms: number | null): string => {
     const s = totalSec % 60
     return `${m}:${s.toString().padStart(2, '0')}`
 }
-
-const expandedArtist = computed<Artist | null>(() =>
-    selectedArtists.value.find(a => a.id === expandedArtistId.value) ?? null
-)
-
-const expandedTracks = computed<Track[]>(() =>
-    expandedArtistId.value ? (topTracksByArtist.value[expandedArtistId.value] ?? []) : []
-)
-
-const expandedLoading = computed<boolean>(() =>
-    expandedArtistId.value ? !!topTracksLoading.value[expandedArtistId.value] : false
-)
 
 const findSimilar = async () => {
     if (selectedArtists.value.length === 0) return
@@ -141,9 +150,18 @@ onBeforeUnmount(() => {
         <h3 class="text-xl mb-4">Add some music</h3>
         <div class="form-field">
             <label>Search for artists</label>
-            <AutoComplete v-model="selectedArtists" :suggestions="searchResults" @complete="search" :multiple="true"
-                :delay="300" :loading="loading" optionLabel="name" placeholder="Type to search artists..."
-                appendTo="body" class="w-full">
+            <AutoComplete
+                ref="autoCompleteRef"
+                v-model="searchQuery"
+                :suggestions="searchResults"
+                @complete="search"
+                @item-select="onArtistSelect"
+                :delay="300"
+                :loading="loading"
+                optionLabel="name"
+                placeholder="Type to search artists..."
+                appendTo="body"
+                class="w-full">
                 <template #option="slotProps">
                     <div class="artist-option">
                         <div class="artist-info">
@@ -158,56 +176,72 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </template>
-
-                <template #chip="slotProps">
-                    <div class="artist-chip"
-                        :class="{ 'artist-chip-active': expandedArtistId === slotProps.value.id }"
-                        @click="toggleArtistExpansion(slotProps.value)">
-                        <img :src="slotProps.value.images[2]?.url ?? slotProps.value.images[0]?.url"
-                            class="chip-image" :alt="slotProps.value.name" />
-                        <span>{{ slotProps.value.name }}</span>
-                        <i class="pi pi-times remove-icon" @click.stop="removeArtist(slotProps.value)" />
-                    </div>
-                </template>
             </AutoComplete>
         </div>
 
-        <div v-if="expandedArtist" class="tracks-panel">
-            <div class="tracks-header">
-                <span>Top tracks — {{ expandedArtist.name }}</span>
-                <button type="button" class="close-tracks" @click="expandedArtistId = null; currentTrackId = null">
-                    <i class="pi pi-times" />
-                </button>
-            </div>
-
-            <div v-if="expandedLoading" class="tracks-loading">
-                <Skeleton v-for="i in 4" :key="i" height="2.5rem" class="track-skeleton" />
-            </div>
-            <div v-else-if="expandedTracks.length === 0" class="tracks-empty">
-                No tracks available for this artist.
-            </div>
-            <ul v-else class="track-list">
-                <li v-for="track in expandedTracks.slice(0, 5)" :key="track.id"
-                    class="track-row" :class="{ 'track-row-active': currentTrackId === track.id }">
-                    <img v-if="track.albumImageUrl" :src="track.albumImageUrl" class="track-cover" :alt="track.name" />
-                    <div v-else class="track-cover track-cover-placeholder"><i class="pi pi-image" /></div>
-                    <div class="track-meta">
-                        <span class="track-name">{{ track.name }}</span>
-                        <span class="track-duration">{{ formatDuration(track.durationMs) }}</span>
+        <ul v-if="selectedArtists.length > 0" class="artist-list">
+            <li v-for="artist in selectedArtists" :key="artist.id">
+                <div
+                    class="artist-row"
+                    :class="{ 'artist-row-expanded': expandedArtistId === artist.id }"
+                    role="button"
+                    tabindex="0"
+                    :aria-expanded="expandedArtistId === artist.id"
+                    :aria-label="`${expandedArtistId === artist.id ? 'Collapse' : 'Expand'} top tracks for ${artist.name}`"
+                    @click="toggleArtistExpansion(artist)"
+                    @keydown="onRowKeydown($event, artist)">
+                    <img
+                        v-if="artist.images[2]?.url ?? artist.images[0]?.url"
+                        :src="artist.images[2]?.url ?? artist.images[0]?.url"
+                        class="artist-row-image" :alt="artist.name" />
+                    <div v-else class="artist-row-image artist-row-image-placeholder"><i class="pi pi-user" /></div>
+                    <div class="artist-row-meta">
+                        <span class="artist-row-name">{{ artist.name }}</span>
+                        <div v-if="artist.genres && artist.genres.length > 0" class="artist-row-genres">
+                            <Tag v-for="genre in artist.genres.slice(0, 2)" :key="genre" :value="genre" />
+                        </div>
                     </div>
-                    <Button :icon="currentTrackId === track.id ? 'pi pi-volume-up' : 'pi pi-play'"
-                        :severity="currentTrackId === track.id ? 'success' : 'secondary'"
-                        text rounded :aria-label="`Play ${track.name}`" @click="playTrack(track)" />
-                </li>
-            </ul>
+                    <i class="pi pi-chevron-down artist-row-chevron" aria-hidden="true" />
+                    <button
+                        type="button"
+                        class="artist-row-remove"
+                        :aria-label="`Remove ${artist.name}`"
+                        @click.stop="removeArtist(artist)">
+                        <i class="pi pi-times" aria-hidden="true" />
+                    </button>
+                </div>
+                <div v-if="expandedArtistId === artist.id" class="artist-row-expansion">
+                    <div class="artist-row-expansion-header">Top tracks</div>
+                    <div v-if="topTracksLoading[artist.id]" class="tracks-loading">
+                        <Skeleton v-for="i in 4" :key="i" height="2.5rem" class="track-skeleton" />
+                    </div>
+                    <div v-else-if="(topTracksByArtist[artist.id]?.length ?? 0) === 0" class="tracks-empty">
+                        No tracks available for this artist.
+                    </div>
+                    <ul v-else class="track-list">
+                        <li v-for="track in (topTracksByArtist[artist.id] ?? []).slice(0, 5)" :key="track.id"
+                            class="track-row" :class="{ 'track-row-active': currentTrackId === track.id }">
+                            <img v-if="track.albumImageUrl" :src="track.albumImageUrl" class="track-cover" :alt="track.name" />
+                            <div v-else class="track-cover track-cover-placeholder"><i class="pi pi-image" /></div>
+                            <div class="track-meta">
+                                <span class="track-name">{{ track.name }}</span>
+                                <span class="track-duration">{{ formatDuration(track.durationMs) }}</span>
+                            </div>
+                            <Button :icon="currentTrackId === track.id ? 'pi pi-volume-up' : 'pi pi-play'"
+                                :severity="currentTrackId === track.id ? 'success' : 'secondary'"
+                                text rounded :aria-label="`Play ${track.name}`" @click.stop="playTrack(track)" />
+                        </li>
+                    </ul>
 
-            <iframe v-if="currentTrackId"
-                class="spotify-embed"
-                :src="`https://open.spotify.com/embed/track/${currentTrackId}?theme=0`"
-                width="100%" height="80" frameborder="0"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                loading="lazy" />
-        </div>
+                    <iframe v-if="currentTrackId"
+                        class="spotify-embed"
+                        :src="`https://open.spotify.com/embed/track/${currentTrackId}?theme=0`"
+                        width="100%" height="80" frameborder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                        loading="lazy" />
+                </div>
+            </li>
+        </ul>
 
         <div v-if="selectedArtists.length > 0" class="similar-section">
             <div class="similar-actions">
@@ -298,53 +332,6 @@ onBeforeUnmount(() => {
     font-size: 0.60rem;
 }
 
-.artist-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.125rem 0.5rem 0.125rem 0.125rem;
-    background-color: var(--p-primary-color);
-    color: var(--primary-color-text);
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: filter 0.15s;
-}
-
-.artist-chip:hover {
-    filter: brightness(1.1);
-}
-
-.artist-chip-active {
-    outline: 2px solid var(--p-primary-color);
-    outline-offset: 2px;
-}
-
-.chip-image {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.remove-icon {
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: 0.25rem;
-    margin-left: 0.25rem;
-    color: var(--primary-color-text);
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remove-icon:hover {
-    opacity: 1;
-}
-
 .p-autocomplete {
     width: 100%;
 }
@@ -386,6 +373,143 @@ onBeforeUnmount(() => {
     display: none;
 }
 
+/* Selected-artist accordion list */
+.artist-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.artist-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--p-surface-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--p-text-color);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+}
+
+.artist-row:hover,
+.artist-row:focus-visible {
+    background: var(--p-surface-hover);
+    border-color: var(--p-primary-color);
+    outline: none;
+}
+
+.artist-row-expanded {
+    border-color: var(--p-primary-color);
+}
+
+.artist-row-image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.artist-row-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--p-surface-border);
+    color: var(--p-text-muted-color, #888);
+}
+
+.artist-row-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.artist-row-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artist-row-genres {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.artist-row-genres .p-tag {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.6rem;
+}
+
+.artist-row-chevron {
+    font-size: 0.875rem;
+    color: var(--p-text-muted-color, #888);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.artist-row-expanded .artist-row-chevron {
+    transform: rotate(180deg);
+}
+
+.artist-row-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--p-text-muted-color, #888);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s, background 0.15s;
+    flex-shrink: 0;
+}
+
+.artist-row-remove:hover,
+.artist-row-remove:focus-visible {
+    opacity: 1;
+    background: var(--p-surface-hover);
+    outline: none;
+}
+
+.artist-row-expansion {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--p-surface-border);
+    border-radius: 8px;
+    background: var(--p-surface-card, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.artist-row-expansion-header {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--p-text-color);
+}
+
+@media (max-width: 767px) {
+    .artist-row-image { width: 2.5rem; height: 2.5rem; }
+    .artist-row-name { font-size: 0.875rem; }
+}
+
 .p-dialog-header {
     padding: 1.5rem;
     background-color: transparent;
@@ -397,37 +521,6 @@ onBeforeUnmount(() => {
 .p-dialog-header-close {
     color: var(--p-text-color);
 }
-
-/* Tracks panel */
-.tracks-panel {
-    border: 1px solid var(--p-surface-border);
-    border-radius: 8px;
-    padding: 0.75rem;
-    background: var(--p-surface-card, transparent);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.tracks-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--p-text-color);
-}
-
-.close-tracks {
-    background: transparent;
-    border: none;
-    color: var(--p-text-color);
-    cursor: pointer;
-    opacity: 0.6;
-    padding: 0.25rem;
-}
-
-.close-tracks:hover { opacity: 1; }
 
 .tracks-loading {
     display: flex;
@@ -596,11 +689,6 @@ onBeforeUnmount(() => {
     .artist-image {
         width: 2rem;
         height: 2rem;
-    }
-
-    .chip-image {
-        width: 1rem;
-        height: 1rem;
     }
 
     .similar-grid {
