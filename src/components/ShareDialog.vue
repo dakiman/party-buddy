@@ -27,11 +27,21 @@ const canvas = useTemplateRef<HTMLCanvasElement>('qrCanvas')
 watch(
   () => props.visible,
   async (open) => {
-    if (open) {
+    if (!open) return
+    if (link.value === null) {
       await loadOrIssue()
     } else {
-      link.value = null
+      // Cached link — canvas remounts when dialog reopens, so re-render the QR.
+      await renderQr()
     }
+  },
+)
+
+watch(
+  () => props.eventId,
+  () => {
+    // If the consumer points the dialog at a different event, invalidate the cache.
+    link.value = null
   },
 )
 
@@ -55,9 +65,11 @@ async function loadOrIssue() {
 
 async function renderQr() {
   if (!link.value) return
-  // Wait for Vue to mount the canvas (it only renders in the v-else-if="link" branch)
   await nextTick()
-  if (!canvas.value || !link.value) return
+  if (!canvas.value || !link.value) {
+    console.warn('[ShareDialog] QR canvas not in DOM after nextTick — QR will not render.')
+    return
+  }
   await QRCode.toCanvas(canvas.value, link.value.url, { width: 220, margin: 1 })
 }
 

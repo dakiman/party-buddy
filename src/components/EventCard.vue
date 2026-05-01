@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import type { EventResponse } from '@/types'
 
-const props = defineProps<{ event: EventResponse }>()
-const router = useRouter()
-
-function go() {
-  router.push(`/events/${props.event.id}`)
-}
+defineProps<{ event: EventResponse }>()
 
 function formatDate(iso?: string): string {
   if (!iso) return 'Date TBA'
@@ -29,7 +23,11 @@ function formatTime(t?: string): string | null {
 </script>
 
 <template>
-  <button class="event-card" @click="go" :aria-label="`Open ${event.name}`">
+  <router-link
+    :to="`/events/${event.id}`"
+    class="event-card"
+    :aria-label="`Open ${event.name}`"
+  >
     <h3 class="card-title">{{ event.name }}</h3>
     <div class="card-meta">
       <span class="card-date">{{ formatDate(event.date) }}</span>
@@ -40,21 +38,18 @@ function formatTime(t?: string): string | null {
       <span>{{ event.location.description }}</span>
     </div>
     <div class="card-host">by {{ event.creatorUsername }}</div>
-  </button>
+  </router-link>
 </template>
 
 <style scoped>
 .event-card {
   display: block;
-  width: 100%;
-  text-align: left;
+  text-decoration: none;
+  color: inherit;
   background: var(--p-surface-card);
   border: 1px solid var(--p-surface-border);
   border-radius: 8px;
   padding: 1rem 1.25rem;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
   transition: border-color 120ms ease, transform 120ms ease;
 }
 

@@ -172,7 +172,7 @@ const shareDialogOpen = ref(false)
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
   background-color: var(--p-primary-color);
-  color: var(--p-rimary-color-text);
+  color: var(--p-primary-color-text);
   border-radius: 1rem;
   font-size: 0.875rem;
 }
