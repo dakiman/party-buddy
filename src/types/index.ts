@@ -136,3 +136,21 @@ export interface UpdateEventPayload {
   food?: string[]
   isPrivate?: boolean
 }
+
+// ─── Sharing & discovery (Phase 3) ─────────────────────────────────────────
+
+export interface ShareLink {
+  token: string
+  url: string
+}
+
+/**
+ * Response shape for paginated event listings (e.g. GET /events/public).
+ * Mirrors the relevant fields from Spring's Page<T>.
+ */
+export interface PaginatedEvents {
+  content: EventResponse[]
+  totalElements: number
+  page: number
+  size: number
+}
