@@ -99,6 +99,16 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 - `EventCard.vue` is the discovery-feed card. Cards link to `/events/:id` (which is public on the BE for non-private events).
 - Discover URL state (search query, page, past-events toggle) is synced to the URL via `router.replace({ query })` — back-button + shareable-search work.
 
+### Phase 3.5 — Guest identities, join requests, attendees (added 2026-05-01)
+
+- **localStorage convention:** key `partyapp.guest_token` carries the guest identity. `api.ts` injects it as `X-Guest-Token: <uuid>` on every outgoing request alongside the existing `Authorization: Bearer` header.
+- **`SharedEvent.vue` is now state-branched** based on `GET /share/{token}/me`. Five branches: `not_requested` → `<RequestToJoinPanel>` or `<PublicRsvpPanel>` (via `eventIsPrivate`); `pending` → "your request is pending" + refresh button; `approved` / `attending` → full `<EventDetails>` + `<AttendeeRsvpToggle>` + `<AttendeeList>`; `declined` → frozen message.
+- **`EventTeaser.vue`** renders a stripped-down event card (name, date, location, host) for not-yet-approved guests. Distinct from `EventDetails`.
+- **`<RequestDialog>` is shared** between request flow (private events) and public-event RSVP claim flow via a `mode` prop.
+- **`<AttendeeList>`** silently renders nothing on 403 (private event, non-attendee viewer). The 403 is the visibility gate from `AttendeeService` (BE §4.6).
+- **`<PendingBadge>`** in `AppHeader` polls `GET /events/requests/count` on auth state change and on route change. Phase 5 will replace polling with push.
+- **No new routes.** Phase 3.5 lives entirely on the existing `/shared/:token` and `/events/:id` routes.
+
 ## Roadmap
 
 `/home/dakiman/projects/party-docs/specs/2026-04-28-party-app-roadmap-design.md`

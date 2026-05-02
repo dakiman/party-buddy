@@ -6,6 +6,7 @@ import Avatar from 'primevue/avatar'
 import { useAuthStore } from '@/stores/auth'
 import LoginModal from './LoginModal.vue'
 import RegisterModal from './RegisterModal.vue'
+import PendingBadge from './PendingBadge.vue'
 
 const authStore = useAuthStore()
 const loginModal = ref()
@@ -72,6 +73,7 @@ function showRegister() {
 
       <div class="header-actions">
         <template v-if="isLoggedIn">
+          <PendingBadge class="pending-badge" />
           <Button
             icon="pi pi-bars"
             class="menu-button p-button-text p-button-rounded"
@@ -149,6 +151,10 @@ function showRegister() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.app-header .pending-badge {
+  margin-right: 0.25rem;
 }
 
 .app-header .user-info {
