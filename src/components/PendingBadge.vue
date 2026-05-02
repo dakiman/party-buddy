@@ -22,7 +22,7 @@ async function refresh() {
 }
 
 onMounted(refresh)
-watch(() => route.fullPath, refresh)
+watch(() => route.path, refresh)
 watch(() => authStore.isAuthenticated, refresh)
 </script>
 

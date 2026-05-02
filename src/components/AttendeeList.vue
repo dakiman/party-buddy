@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { useToast } from 'primevue/usetoast'
 import { listAttendees, type Attendee } from '@/services/events'
+import { identityLabel } from '@/utils/identity'
 
 const props = defineProps<{ eventId: number }>()
 
+const toast = useToast()
 const attendees = ref<Attendee[]>([])
 const loading = ref(true)
 const accessible = ref(true)
@@ -17,6 +20,14 @@ async function load() {
     const status = (e as { response?: { status?: number } })?.response?.status
     if (status === 403 || status === 401) {
       accessible.value = false
+    } else {
+      accessible.value = false  // also hide on other errors so we don't render misleading empty columns
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load attendees.',
+        life: 3000,
+      })
     }
   } finally {
     loading.value = false
@@ -31,12 +42,6 @@ watch(() => props.eventId, load)
 const going    = computed(() => attendees.value.filter(a => a.status === 'GOING'))
 const maybe    = computed(() => attendees.value.filter(a => a.status === 'MAYBE'))
 const declined = computed(() => attendees.value.filter(a => a.status === 'DECLINED'))
-
-function label(a: Attendee): string {
-  return a.identity.kind === 'USER'
-    ? `@${a.identity.username}`
-    : `${a.identity.displayName}#${a.identity.discriminator}`
-}
 </script>
 
 <template>
@@ -45,17 +50,17 @@ function label(a: Attendee): string {
     <div class="columns">
       <div class="col">
         <div class="col-header">Going ({{ going.length }})</div>
-        <div v-for="a in going" :key="a.id" class="row">{{ label(a) }}</div>
+        <div v-for="a in going" :key="a.id" class="row">{{ identityLabel(a.identity) }}</div>
         <div v-if="going.length === 0" class="empty">—</div>
       </div>
       <div class="col">
         <div class="col-header">Maybe ({{ maybe.length }})</div>
-        <div v-for="a in maybe" :key="a.id" class="row">{{ label(a) }}</div>
+        <div v-for="a in maybe" :key="a.id" class="row">{{ identityLabel(a.identity) }}</div>
         <div v-if="maybe.length === 0" class="empty">—</div>
       </div>
       <div class="col">
         <div class="col-header">Declined ({{ declined.length }})</div>
-        <div v-for="a in declined" :key="a.id" class="row">{{ label(a) }}</div>
+        <div v-for="a in declined" :key="a.id" class="row">{{ identityLabel(a.identity) }}</div>
         <div v-if="declined.length === 0" class="empty">—</div>
       </div>
     </div>

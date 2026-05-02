@@ -14,9 +14,9 @@ function formatDate(iso?: string): string {
   <div class="event-teaser">
     <h1 class="teaser-title">{{ event.name }}</h1>
     <div class="teaser-meta">
-      <div v-if="event.date">📅 {{ formatDate(event.date) }}</div>
-      <div v-if="event.location?.description">📍 {{ event.location.description }}</div>
-      <div>👤 hosted by {{ event.creatorUsername }}</div>
+      <div v-if="event.date"><i class="pi pi-calendar" /> {{ formatDate(event.date) }}</div>
+      <div v-if="event.location?.description"><i class="pi pi-map-marker" /> {{ event.location.description }}</div>
+      <div><i class="pi pi-user" /> hosted by {{ event.creatorUsername }}</div>
     </div>
   </div>
 </template>
@@ -31,4 +31,9 @@ function formatDate(iso?: string): string {
 }
 .teaser-title { font-size: 1.5rem; margin: 0 0 0.5rem 0; color: var(--p-text-color); }
 .teaser-meta { display: flex; flex-direction: column; gap: 0.4rem; color: var(--p-text-secondary-color); }
+.teaser-meta div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 </style>

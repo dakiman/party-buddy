@@ -15,7 +15,7 @@ import RequestToJoinPanel from '@/components/RequestToJoinPanel.vue'
 import PublicRsvpPanel from '@/components/PublicRsvpPanel.vue'
 import AttendeeRsvpToggle from '@/components/AttendeeRsvpToggle.vue'
 import AttendeeList from '@/components/AttendeeList.vue'
-import type { EventResponse, RsvpStatus } from '@/types'
+import type { EventResponse } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,38 +27,56 @@ const loading = ref(true)
 const notFound = ref(false)
 const viewerState = ref<ShareViewerState | null>(null)
 const event = ref<EventResponse | null>(null)
-const myStatus = ref<RsvpStatus | null>(null)
 
 const canEdit = computed(
   () => !!event.value && authStore.user?.username === event.value.creatorUsername,
 )
 
+let currentLoadId = 0
+
 async function load() {
+  const requestId = ++currentLoadId
+  const token = String(route.params.token)
+
   loading.value = true
   notFound.value = false
   viewerState.value = null
   event.value = null
-  const token = String(route.params.token)
-  try {
-    viewerState.value = await getViewerState(token)
-  } catch (e: unknown) {
-    const status = (e as { response?: { status?: number } })?.response?.status
-    if (status === 404) notFound.value = true
-    else toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load shared event.', life: 3000 })
-    loading.value = false
-    return
-  }
 
-  // Always fetch the event details — the privacy-gate on getEventByShareToken
-  // returns the full event for any valid share token (Phase 3 contract).
   try {
-    event.value = await getEventByShareToken(token)
-  } catch {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load event details.', life: 3000 })
-  }
+    const [vsResult, evResult] = await Promise.allSettled([
+      getViewerState(token),
+      getEventByShareToken(token),
+    ])
 
-  myStatus.value = viewerState.value?.attendeeStatus ?? null
-  loading.value = false
+    if (requestId !== currentLoadId) return  // newer load superseded us
+
+    if (vsResult.status === 'rejected') {
+      const status = (vsResult.reason as { response?: { status?: number } })?.response?.status
+      if (status === 404) {
+        notFound.value = true
+      } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load shared event.', life: 3000 })
+      }
+      return
+    }
+    viewerState.value = vsResult.value
+    if (
+      (viewerState.value.state === 'approved' || viewerState.value.state === 'attending')
+      && !viewerState.value.attendeeStatus
+    ) {
+      viewerState.value.attendeeStatus = 'GOING'
+    }
+
+    if (evResult.status === 'fulfilled') {
+      event.value = evResult.value
+    } else {
+      // Event teaser/details unavailable — keep viewerState so the request CTA still renders for not_requested.
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load event details.', life: 3000 })
+    }
+  } finally {
+    if (requestId === currentLoadId) loading.value = false
+  }
 }
 
 async function onRequestSubmitted() {
@@ -107,10 +125,10 @@ const showFullView = computed(
       <template v-if="showFullView">
         <EventDetails :event="event" :can-edit="canEdit" @edit="goToEdit" @delete="confirmDelete" />
         <AttendeeRsvpToggle
-          v-if="myStatus"
+          v-if="viewerState.attendeeStatus"
           :event-id="event.id"
-          :status="myStatus"
-          @update:status="myStatus = $event"
+          :status="viewerState.attendeeStatus"
+          @update:status="(s) => { if (viewerState) viewerState.attendeeStatus = s }"
         />
         <AttendeeList :event-id="event.id" />
       </template>

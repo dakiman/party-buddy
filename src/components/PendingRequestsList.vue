@@ -6,6 +6,7 @@ import {
   listPendingRequests, approveRequest, declineRequest,
   type PendingRequest,
 } from '@/services/events'
+import { identityLabel } from '@/utils/identity'
 
 const props = defineProps<{ eventId: number }>()
 const emit = defineEmits<{ decided: [] }>()
@@ -52,12 +53,6 @@ async function onDecline(req: PendingRequest) {
   }
 }
 
-function label(req: PendingRequest): string {
-  return req.requester.kind === 'USER'
-    ? `@${req.requester.username}`
-    : `${req.requester.displayName}#${req.requester.discriminator}`
-}
-
 onMounted(load)
 watch(() => props.eventId, load)
 </script>
@@ -67,7 +62,7 @@ watch(() => props.eventId, load)
     <h3>Pending requests ({{ requests.length }})</h3>
     <div v-for="req in requests" :key="req.id" class="request-row">
       <div class="info">
-        <div class="identity">{{ label(req) }}</div>
+        <div class="identity">{{ identityLabel(req.requester) }}</div>
         <div v-if="req.requester.contactNote" class="note">{{ req.requester.contactNote }}</div>
         <div class="meta">requested {{ new Date(req.createdAt).toLocaleString() }}</div>
       </div>
