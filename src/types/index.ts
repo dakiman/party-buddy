@@ -154,3 +154,8 @@ export interface PaginatedEvents {
   page: number
   size: number
 }
+
+// ─── Phase 3.5: RSVP & Join Requests ────────────────────────────────────────
+
+export type RsvpStatus = 'GOING' | 'MAYBE' | 'DECLINED'
+export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED'

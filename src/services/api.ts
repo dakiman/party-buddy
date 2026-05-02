@@ -15,6 +15,10 @@ api.interceptors.request.use(config => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  const guestToken = localStorage.getItem('partyapp.guest_token')
+  if (guestToken) {
+    config.headers['X-Guest-Token'] = guestToken
+  }
   return config
 })
 
