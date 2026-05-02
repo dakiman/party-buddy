@@ -1,5 +1,5 @@
 import api from './api'
-import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload, PaginatedEvents, ShareLink } from '@/types'
+import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload, PaginatedEvents, ShareLink, RsvpStatus } from '@/types'
 
 // Wire-level shape of an Event as returned by the BE — pre-normalization.
 // Differs from EventResponse only in the `artists[].spotifyId` field name.
@@ -128,4 +128,87 @@ export async function listPublicEvents(params: {
     page: data.number,
     size: data.size,
   }
+}
+
+// ─── Phase 3.5 ────────────────────────────────────────────────────────────
+
+export interface ShareViewerState {
+  state: 'not_requested' | 'pending' | 'approved' | 'declined' | 'attending'
+  attendeeStatus?: RsvpStatus
+  requestDecidedAt?: string
+  isCreator?: boolean
+  eventIsPrivate: boolean
+}
+
+export interface JoinRequestResult {
+  guestToken?: string
+  state: 'pending' | 'attending' | 'already_pending' | 'already_attending' | 'already_declined'
+}
+
+export interface PendingRequest {
+  id: number
+  requester: {
+    kind: 'USER' | 'GUEST'
+    displayName: string
+    discriminator?: string
+    contactNote?: string
+    username?: string
+  }
+  createdAt: string
+}
+
+export interface Attendee {
+  id: number
+  identity: { kind: 'USER' | 'GUEST'; displayName: string; discriminator?: string; username?: string }
+  status: RsvpStatus
+}
+
+const GUEST_TOKEN_KEY = 'partyapp.guest_token'
+
+export async function getViewerState(shareToken: string): Promise<ShareViewerState> {
+  const { data } = await api.get<ShareViewerState>(`/share/${encodeURIComponent(shareToken)}/me`)
+  return data
+}
+
+export async function submitJoinRequest(
+  shareToken: string,
+  body?: { displayName: string; contactNote?: string },
+): Promise<JoinRequestResult> {
+  const { data } = await api.post<JoinRequestResult>(
+    `/share/${encodeURIComponent(shareToken)}/request`,
+    body ?? {},
+  )
+  if (data.guestToken) {
+    localStorage.setItem(GUEST_TOKEN_KEY, data.guestToken)
+  }
+  return data
+}
+
+export async function listPendingRequests(eventId: number): Promise<PendingRequest[]> {
+  const { data } = await api.get<PendingRequest[]>(`/events/${eventId}/requests`)
+  return data
+}
+
+export async function approveRequest(eventId: number, requestId: number): Promise<Attendee> {
+  const { data } = await api.post<Attendee>(`/events/${eventId}/requests/${requestId}/approve`)
+  return data
+}
+
+export async function declineRequest(eventId: number, requestId: number): Promise<void> {
+  await api.post(`/events/${eventId}/requests/${requestId}/decline`)
+}
+
+export async function listAttendees(eventId: number): Promise<Attendee[]> {
+  const { data } = await api.get<Attendee[]>(`/events/${eventId}/attendees`)
+  return data
+}
+
+export async function setMyAttendeeStatus(eventId: number, status: RsvpStatus): Promise<Attendee> {
+  const { data } = await api.put<Attendee>(`/events/${eventId}/attendees/me`, { status })
+  return data
+}
+
+export async function pendingRequestCountForMyEvents(): Promise<number> {
+  const { data } = await api.get<{ count: number }>('/events/requests/count')
+  return data.count
 }
