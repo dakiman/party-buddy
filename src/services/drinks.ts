@@ -11,8 +11,10 @@ export async function getAllDrinks(): Promise<Cocktail[]> {
 }
 
 export async function getDrinksByIngredients(ingredientNames: string[]): Promise<Cocktail[]> {
+  // Comma-join: Spring's @RequestParam List<String> splits on `,`. Default
+  // axios serialization (`ingredients[]=foo`) is bracketed and Spring ignores it.
   const { data } = await api.get<GetDrinksResponse>('/drinks', {
-    params: { ingredients: ingredientNames },
+    params: { ingredients: ingredientNames.join(',') },
   })
   return data.drinks
 }
