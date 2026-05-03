@@ -41,15 +41,43 @@ export interface Track {
 
 // ─── Drinks & Ingredients ──────────────────────────────────────────────────
 
-export interface Drink {
-  id: number
+/**
+ * An ingredient as picked in the wizard's "Drinks (alcohols on hand)" step.
+ * The picker filters to alcoholic ingredients only; this type reflects that
+ * shape (id is the BE Integer, but the existing AutoComplete component
+ * receives it as a string from JSON.parse).
+ */
+export interface IngredientPick {
+  id: string
   name: string
-  recipe?: string
-  externalId?: number
-  isAlcoholic: boolean
-  thumbnail?: string
+  type?: string
 }
 
+/** Wire-level shape for one ingredient inside a Cocktail. */
+export interface CocktailIngredient {
+  name: string
+  /** Free-form from seed: "1 oz", "½ oz", "to taste", or null/empty. */
+  amount?: string
+  isAlcoholic: boolean
+  abv?: string
+}
+
+/** A cocktail returned by GET /drinks or GET /drinks?ingredients=... */
+export interface Cocktail {
+  id: number
+  name: string
+  /** Null/missing on rare seed rows; render card without recipe block. */
+  recipe?: string
+  thumbnail?: string
+  isAlcoholic: boolean
+  ingredients: CocktailIngredient[]
+  /** Populated only by the suggestions endpoint (?ingredients=...). */
+  missingAlcoholicIngredients?: string[]
+  /** Populated only by the suggestions endpoint. */
+  fullyMakeable?: boolean
+}
+
+/** Retained for non-event surfaces (e.g. existing /ingredients calls). */
 export interface Ingredient {
   id: number
   name: string
@@ -57,6 +85,9 @@ export interface Ingredient {
   isAlcoholic?: boolean
   description?: string
 }
+
+/** @deprecated use Cocktail. Kept for one phase to avoid touching unrelated callers. */
+export type Drink = Cocktail
 
 // ─── Location ──────────────────────────────────────────────────────────────
 
@@ -85,6 +116,7 @@ export interface EventResponse {
   location?: Location
   artists: Artist[]
   ingredients: Ingredient[]
+  drinks: Cocktail[]
   food: string[]
   isPrivate: boolean
   createdAt: string
