@@ -21,6 +21,7 @@ const loadingIngredients = ref(false)
 const suggestions = ref<Cocktail[]>([])
 const loadingSuggestions = ref(false)
 const suggestionsError = ref<string | null>(null)
+const expandedCocktailIds = ref<Set<number>>(new Set())
 const selectedCocktails = ref<Cocktail[]>([...wizardStore.formData.cocktails])
 
 // ─── Food state (existing) ───────────────────────────────────────────────
@@ -122,6 +123,13 @@ const toggleCocktail = (cocktail: Cocktail) => {
 const removeCocktail = (cocktail: Cocktail) =>
   (selectedCocktails.value = selectedCocktails.value.filter(c => c.id !== cocktail.id))
 
+const toggleExpanded = (id: number) => {
+  const next = new Set(expandedCocktailIds.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  expandedCocktailIds.value = next
+}
+
 // ─── Sync to store ───────────────────────────────────────────────────────
 watch([selectedIngredients, selectedCocktails, selectedFood],
   ([ings, cocks, foods]) => {
@@ -211,27 +219,37 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
           v-for="cocktail in suggestions"
           :key="cocktail.id"
           class="suggestion-row"
+          :class="{ expanded: expandedCocktailIds.has(cocktail.id) }"
         >
-          <div class="suggestion-header">
+          <div class="suggestion-header" @click="toggleExpanded(cocktail.id)">
             <img v-if="cocktail.thumbnail" :src="cocktail.thumbnail" class="suggestion-thumb"
                  :alt="cocktail.name" />
-            <div class="suggestion-name">{{ cocktail.name }}</div>
+            <div class="suggestion-text">
+              <div class="suggestion-name">{{ cocktail.name }}</div>
+              <p v-if="cocktail.recipe && !expandedCocktailIds.has(cocktail.id)" class="recipe-preview">
+                {{ cocktail.recipe }}
+              </p>
+            </div>
+            <i class="pi expand-chevron"
+               :class="expandedCocktailIds.has(cocktail.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />
             <Button
               :label="isSelected(cocktail) ? 'Added' : 'Add'"
               :icon="isSelected(cocktail) ? 'pi pi-check' : 'pi pi-plus'"
               size="small"
               :severity="isSelected(cocktail) ? 'success' : 'secondary'"
-              @click="toggleCocktail(cocktail)"
+              @click.stop="toggleCocktail(cocktail)"
             />
           </div>
 
-          <p v-if="cocktail.recipe" class="recipe-text">{{ cocktail.recipe }}</p>
-          <ul v-if="cocktail.ingredients?.length" class="ingredient-list">
-            <li v-for="ing in cocktail.ingredients" :key="ing.name">
-              <span v-if="ing.amount" class="ingredient-amount">{{ ing.amount }}</span>
-              <span class="ingredient-name">{{ ing.name }}</span>
-            </li>
-          </ul>
+          <div v-if="expandedCocktailIds.has(cocktail.id)" class="suggestion-details">
+            <p v-if="cocktail.recipe" class="recipe-text">{{ cocktail.recipe }}</p>
+            <ul v-if="cocktail.ingredients?.length" class="ingredient-list">
+              <li v-for="ing in cocktail.ingredients" :key="ing.name">
+                <span v-if="ing.amount" class="ingredient-amount">{{ ing.amount }}</span>
+                <span class="ingredient-name">{{ ing.name }}</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -430,26 +448,57 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   border-radius: 6px;
   font-size: 0.875rem;
 }
-.suggestions-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.suggestions-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .suggestion-row {
   border: 1px solid var(--p-surface-border);
   border-radius: 8px;
   background-color: var(--p-surface-card);
-  padding: 0.75rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
 }
+.suggestion-row.expanded { border-color: var(--p-primary-color); }
 .suggestion-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 0.75rem;
   align-items: center;
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
 }
 .suggestion-thumb {
   width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;
 }
+.suggestion-text {
+  min-width: 0; /* allow ellipsis to engage inside grid 1fr column */
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
 .suggestion-name { font-weight: 500; font-size: 1rem; }
+.recipe-preview {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--p-text-muted-color, var(--p-text-color));
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.expand-chevron {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color, var(--p-text-color));
+  opacity: 0.6;
+}
+.suggestion-details {
+  padding: 0 0.875rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--p-surface-border);
+  margin-top: 0;
+  padding-top: 0.625rem;
+}
 .recipe-text {
   margin: 0;
   font-size: 0.875rem;
