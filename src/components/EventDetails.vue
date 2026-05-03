@@ -77,25 +77,47 @@ const shareDialogOpen = ref(false)
       </div>
     </div>
 
+    <!-- Cocktails — new in Phase 7 -->
+    <div class="event-section" v-if="event.drinks?.length">
+      <h2>Cocktails</h2>
+      <div class="cocktail-cards">
+        <div v-for="cocktail in event.drinks" :key="cocktail.id" class="cocktail-card">
+          <div class="cocktail-card-header">
+            <img v-if="cocktail.thumbnail" :src="cocktail.thumbnail" class="cocktail-thumb"
+                 :alt="cocktail.name" />
+            <h3 class="cocktail-name">{{ cocktail.name }}</h3>
+          </div>
+          <p v-if="cocktail.recipe" class="cocktail-recipe">{{ cocktail.recipe }}</p>
+          <ul v-if="cocktail.ingredients?.length" class="cocktail-ingredients">
+            <li v-for="ing in cocktail.ingredients" :key="ing.name">
+              <span v-if="ing.amount" class="ingredient-amount">{{ ing.amount }}</span>
+              <span class="ingredient-name">{{ ing.name }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar (alcohols on hand) + Food — relabeled from "Drinks & Food" -->
     <div class="event-section" v-if="event.ingredients?.length || event.food?.length">
-      <h2>Drinks & Food</h2>
+      <h2>Bar &amp; Food</h2>
       <div class="section-content">
         <div class="info-field" v-if="event.ingredients?.length">
-          <label>Drinks:</label>
+          <label>Alcohols on hand:</label>
           <div class="chips-container">
-            <div v-for="drink in event.ingredients" :key="drink.id" class="info-chip">
+            <div v-for="ing in event.ingredients" :key="ing.id" class="info-chip">
               <img
-                :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(drink.name)}-Small.png`"
+                :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ing.name)}-Small.png`"
                 class="chip-image"
-                :alt="drink.name"
+                :alt="ing.name"
               />
-              {{ drink.name }}
+              {{ ing.name }}
             </div>
           </div>
         </div>
 
         <div class="info-field" v-if="event.food?.length">
-          <label>Food & Snacks:</label>
+          <label>Food &amp; Snacks:</label>
           <div class="chips-container">
             <div v-for="food in event.food" :key="food" class="info-chip">
               {{ food }}
@@ -188,5 +210,54 @@ const shareDialogOpen = ref(false)
   display: flex;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+
+.cocktail-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.cocktail-card {
+  border: 1px solid var(--p-surface-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: var(--p-surface-card);
+}
+.cocktail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.cocktail-thumb {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.cocktail-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+.cocktail-recipe {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.cocktail-ingredients {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+.cocktail-ingredients .ingredient-amount {
+  font-weight: 500;
+  margin-right: 0.5rem;
+  display: inline-block;
+  min-width: 4rem;
 }
 </style>
