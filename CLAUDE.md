@@ -44,7 +44,7 @@ Step value strings (`"1"`, `"2"`, `"3"`, `"4"`) are computed dynamically based o
 ### Stores
 
 - **`useAuthStore`** (`stores/auth.ts`) — JWT in `localStorage` under key `token`. `login()`/`register()` POST to `/auth/*`; `logout()` clears state and storage. On store init, a stored token triggers a `GET /auth/user` to rehydrate; if it 401s, logout.
-- **`useWizardStore`** (`stores/wizard.ts`) — In-progress event form data; reset on dialog close. Holds the full `WizardData` shape (name, date, time, location, artists, drinks, food, isPrivate, enabledSteps).
+- **`useWizardStore`** (`stores/wizard.ts`) — In-progress event form data; reset on dialog close. Holds the full `WizardData` shape (name, date, time, location, artists, ingredients, cocktails, food, isPrivate, enabledSteps). The Phase 7 rename split the old `drinks` field into `ingredients` (alcohols on hand, picked from `/ingredients`) and `cocktails` (recipes opted-into from `/drinks?ingredients=...` suggestions); they map back to `CreateEventPayload.ingredients` and `.drinks` respectively on submit.
 
 ### API services
 
@@ -73,7 +73,7 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 - **The 401 axios interceptor is empty** (`// Handle unauthorized` comment only). A token expiring silently leaves the user in a broken state until reload. Phase 1 wires it.
 - **The `<meta viewport>` tag has `maximum-scale=1.0, user-scalable=no`** — accessibility issue. Phase 9 polish removes this.
 - **Dark mode is forced** — no light toggle. Phase 9 adds one.
-- **`PostEventRequest.drinks` is sent as `[]` always** from `EventWizard.handleFinish()` — historical artifact; removed when BE drops the field in Phase 9.
+- **`PostEventRequest.drinks` carries cocktail IDs (not ingredient IDs)** as of Phase 7. The wizard's `cocktails: Cocktail[]` is mapped to `drinks: number[]` on submit; the old `drinks: []`-always behavior is gone.
 - **`EventWizard` is dual-mode** — pass `:initialEvent="event"` to put it in edit mode. `show()` calls `seedStoreFromEvent()` internally before opening the dialog. `handleFinish` branches on `isEditMode`: edit mode calls `updateEvent(id, payload)` and navigates to `/events/:id`; create mode calls `createEvent(payload)` and navigates to `/`. The `close()` / store reset is mode-agnostic.
 - **`ConfirmDialog` must be mounted in `App.vue`** — PrimeVue's `useConfirm()` composable requires a single `<ConfirmDialog />` instance in the component tree and `ConfirmationService` installed on the Vue app. Both are now present. Do not add a second `<ConfirmDialog />` or the confirm callbacks will fire twice.
 - **`EventResponse.creatorUsername`** — the BE now includes `creatorUsername` on every event response. `EventView` and `EditEvent` use it to gate Edit/Delete visibility and to guard the edit route. The FE also relies on `authStore.user?.username` being populated (via `GET /auth/user` on store init).
@@ -108,6 +108,17 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 - **`<AttendeeList>`** silently renders nothing on 403 (private event, non-attendee viewer). The 403 is the visibility gate from `AttendeeService` (BE §4.6).
 - **`<PendingBadge>`** in `AppHeader` polls `GET /events/requests/count` on auth state change and on route change. Phase 5 will replace polling with push.
 - **No new routes.** Phase 3.5 lives entirely on the existing `/shared/:token` and `/events/:id` routes.
+
+### Phase 7 — Drink recipe surfacing (added 2026-05-02)
+
+- **Wizard store rename:** `WizardData.drinks` (which always held *ingredient* picks, not drinks — a long-standing UX lie) was renamed to `ingredients`. A new `cocktails: Cocktail[]` field holds the actual cocktails picked from the suggestions panel. On submit, `cocktails.map(c => c.id)` flows into `CreateEventPayload.drinks`. Internal-only — no API change.
+- **`IngredientPick`** (the wizard-side ingredient shape with `id: string`) is exported from both `@/types` and `@/stores/wizard` (the latter re-exports from the former). Always import from `@/types` in new code.
+- **`EventResponse.drinks: Cocktail[]`** is now plumbed through the FE — `services/events.ts#normalizeEvent` populates it from the BE response. Previously the FE typed it as `unknown` and ignored it.
+- **`getDrinksByIngredients` axios serialization gotcha:** default axios array-param encoding is `?ingredients[]=foo` (PHP brackets), which Spring's `@RequestParam List<String>` silently ignores. The service comma-joins the array (`?ingredients=foo,bar`) so Spring parses it. If you add another endpoint that takes a list param, do the same.
+- **`DrinksAndFoodStep.vue`** below the alcohols-on-hand picker: a "Suggested cocktails" panel debounces 300 ms on alcoholic-ingredient changes, calls `/drinks?ingredients=...`, and renders rows as compact-with-recipe-preview. Click a row header (not the Add button) to expand inline → full recipe + ingredient amounts. The `expandedCocktailIds: Set<number>` reactivity uses the new-Set-on-mutation idiom (Vue 3 doesn't track `Set.add` in place).
+- **`EventDetails.vue`** has two new sections: a **Cocktails** section (always-expanded cards with thumbnail + recipe + ingredient amounts), and the old "Drinks & Food" chip section relabeled to **"Bar & Food"** with sub-label "Alcohols on hand:" — the old "Drinks" header was the same UX lie the wizard rename addresses.
+- **`fullyMakeable` / `missingAlcoholicIngredients`** are still on the wire from the BE but currently unused on the FE (we dropped the Tag pills during smoke-test iteration). Keep the data path open — a future inline "you don't have this" indicator on missing ingredients is cheap to add without a BE change.
+- **TheCocktailDB seed has both generic and branded ingredient rows** (e.g. "Vodka" matches 20 cocktails, "Absolut Vodka" matches 1). The picker autocomplete shows both; users picking the brand variant get sparse suggestions. Not a code bug — a data-quality artifact of the upstream source.
 
 ## Roadmap
 
