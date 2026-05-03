@@ -1,5 +1,5 @@
 import api from './api'
-import type { Artist, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload, PaginatedEvents, ShareLink, RsvpStatus } from '@/types'
+import type { Artist, Cocktail, CreateEventPayload, EventResponse, Ingredient, Location, UpdateEventPayload, PaginatedEvents, ShareLink, RsvpStatus } from '@/types'
 
 // Wire-level shape of an Event as returned by the BE — pre-normalization.
 // Differs from EventResponse only in the `artists[].spotifyId` field name.
@@ -26,9 +26,7 @@ interface RawEventResponse {
   createdAt: string
   updatedAt: string
   creatorUsername: string
-  // The BE also sends a `drinks` array (legacy field, always empty from FE).
-  // Type as unknown — we don't read it on the FE.
-  drinks?: unknown
+  drinks?: Cocktail[]
 }
 
 function normalizeArtist(raw: RawEventArtist): Artist {
@@ -52,6 +50,7 @@ function normalizeEvent(raw: RawEventResponse): EventResponse {
     location: raw.location,
     artists: (raw.artists ?? []).map(normalizeArtist),
     ingredients: raw.ingredients ?? [],
+    drinks: raw.drinks ?? [],
     food: raw.food ?? [],
     isPrivate: raw.isPrivate,
     createdAt: raw.createdAt,

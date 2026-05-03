@@ -56,19 +56,31 @@ const wizardStore = useWizardStore()
       </div>
     </div>
 
-    <div class="review-section" v-if="wizardStore.formData.enabledSteps.drinksAndFood && 
-        (wizardStore.formData.drinks.length || wizardStore.formData.food.length)">
+    <div class="review-section" v-if="wizardStore.formData.enabledSteps.drinksAndFood &&
+      (wizardStore.formData.ingredients.length || wizardStore.formData.cocktails.length || wizardStore.formData.food.length)">
       <h4>Drinks & Food</h4>
-      <div class="review-field" v-if="wizardStore.formData.drinks.length">
-        <label>Drinks:</label>
+
+      <div class="review-field" v-if="wizardStore.formData.ingredients.length">
+        <label>Bar:</label>
         <div class="review-chips">
-          <div v-for="drink in wizardStore.formData.drinks" :key="drink.id" class="review-chip">
-            <img :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(drink.name)}-Small.png`" 
-                 class="chip-image" :alt="drink.name" />
-            {{ drink.name }}
+          <div v-for="ing in wizardStore.formData.ingredients" :key="ing.id" class="review-chip">
+            <img :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ing.name)}-Small.png`"
+                 class="chip-image" :alt="ing.name" />
+            {{ ing.name }}
           </div>
         </div>
       </div>
+
+      <div class="review-field" v-if="wizardStore.formData.cocktails.length">
+        <label>Cocktails:</label>
+        <div class="review-chips">
+          <div v-for="cocktail in wizardStore.formData.cocktails" :key="cocktail.id" class="review-chip">
+            <img v-if="cocktail.thumbnail" :src="cocktail.thumbnail" class="chip-image" :alt="cocktail.name" />
+            {{ cocktail.name }}
+          </div>
+        </div>
+      </div>
+
       <div class="review-field" v-if="wizardStore.formData.food.length">
         <label>Food & Snacks:</label>
         <div class="review-chips">
