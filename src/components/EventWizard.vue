@@ -79,12 +79,19 @@ function seedStoreFromEvent(event: EventResponse): void {
       : null,
     locationDescription: event.location?.description ?? '',
     artists: event.artists,
-    drinks: [],  // legacy field — always empty, same as create
+    ingredients: (event.ingredients ?? []).map(i => ({
+      id: String(i.id),
+      name: i.name,
+    })),
+    cocktails: event.drinks ?? [],
     food: event.food ?? [],
     isPrivate: event.isPrivate,
     enabledSteps: {
       music: (event.artists?.length ?? 0) > 0,
-      drinksAndFood: (event.food?.length ?? 0) > 0,
+      drinksAndFood:
+        (event.food?.length ?? 0) > 0 ||
+        (event.ingredients?.length ?? 0) > 0 ||
+        (event.drinks?.length ?? 0) > 0,
     },
   })
 }
@@ -131,9 +138,11 @@ const handleFinish = async () => {
         artists: wizardStore.formData.enabledSteps.music
           ? wizardStore.formData.artists
           : [],
-        drinks: [],
+        drinks: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.cocktails.map(c => c.id)
+          : [],
         ingredients: wizardStore.formData.enabledSteps.drinksAndFood
-          ? wizardStore.formData.drinks.map(drink => Number(drink.id))
+          ? wizardStore.formData.ingredients.map(i => Number(i.id))
           : [],
         food: wizardStore.formData.enabledSteps.drinksAndFood
           ? wizardStore.formData.food
@@ -173,9 +182,11 @@ const handleFinish = async () => {
         artists: wizardStore.formData.enabledSteps.music
           ? wizardStore.formData.artists
           : [],
-        drinks: [],
+        drinks: wizardStore.formData.enabledSteps.drinksAndFood
+          ? wizardStore.formData.cocktails.map(c => c.id)
+          : [],
         ingredients: wizardStore.formData.enabledSteps.drinksAndFood
-          ? wizardStore.formData.drinks.map(drink => Number(drink.id))
+          ? wizardStore.formData.ingredients.map(i => Number(i.id))
           : [],
         food: wizardStore.formData.enabledSteps.drinksAndFood
           ? wizardStore.formData.food
