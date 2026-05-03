@@ -21,7 +21,6 @@ const loadingIngredients = ref(false)
 const suggestions = ref<Cocktail[]>([])
 const loadingSuggestions = ref(false)
 const suggestionsError = ref<string | null>(null)
-const expandedCocktailIds = ref<Set<number>>(new Set())
 const selectedCocktails = ref<Cocktail[]>([...wizardStore.formData.cocktails])
 
 // ─── Food state (existing) ───────────────────────────────────────────────
@@ -108,7 +107,7 @@ onMounted(() => {
 
 onUnmounted(() => window.clearTimeout(suggestionsTimer))
 
-// ─── Cocktail selection / expansion ───────────────────────────────────────
+// ─── Cocktail selection ───────────────────────────────────────────────────
 const isSelected = (cocktail: Cocktail) =>
   selectedCocktails.value.some(c => c.id === cocktail.id)
 
@@ -122,13 +121,6 @@ const toggleCocktail = (cocktail: Cocktail) => {
 
 const removeCocktail = (cocktail: Cocktail) =>
   (selectedCocktails.value = selectedCocktails.value.filter(c => c.id !== cocktail.id))
-
-const toggleExpanded = (id: number) => {
-  const next = new Set(expandedCocktailIds.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  expandedCocktailIds.value = next
-}
 
 // ─── Sync to store ───────────────────────────────────────────────────────
 watch([selectedIngredients, selectedCocktails, selectedFood],
@@ -219,35 +211,27 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
           v-for="cocktail in suggestions"
           :key="cocktail.id"
           class="suggestion-row"
-          :class="{ expanded: expandedCocktailIds.has(cocktail.id) }"
         >
-          <div class="suggestion-summary" @click="toggleExpanded(cocktail.id)">
+          <div class="suggestion-header">
             <img v-if="cocktail.thumbnail" :src="cocktail.thumbnail" class="suggestion-thumb"
                  :alt="cocktail.name" />
             <div class="suggestion-name">{{ cocktail.name }}</div>
-            <div class="suggestion-badge">
-              <Tag v-if="cocktail.fullyMakeable" severity="success" value="Have all alcohols" />
-              <Tag v-else severity="warn"
-                   :value="`Missing: ${cocktail.missingAlcoholicIngredients?.join(', ') ?? ''}`" />
-            </div>
             <Button
               :label="isSelected(cocktail) ? 'Added' : 'Add'"
               :icon="isSelected(cocktail) ? 'pi pi-check' : 'pi pi-plus'"
               size="small"
               :severity="isSelected(cocktail) ? 'success' : 'secondary'"
-              @click.stop="toggleCocktail(cocktail)"
+              @click="toggleCocktail(cocktail)"
             />
           </div>
 
-          <div v-if="expandedCocktailIds.has(cocktail.id)" class="suggestion-details">
-            <p v-if="cocktail.recipe" class="recipe-text">{{ cocktail.recipe }}</p>
-            <ul v-if="cocktail.ingredients?.length" class="ingredient-list">
-              <li v-for="ing in cocktail.ingredients" :key="ing.name">
-                <span v-if="ing.amount" class="ingredient-amount">{{ ing.amount }}</span>
-                <span class="ingredient-name">{{ ing.name }}</span>
-              </li>
-            </ul>
-          </div>
+          <p v-if="cocktail.recipe" class="recipe-text">{{ cocktail.recipe }}</p>
+          <ul v-if="cocktail.ingredients?.length" class="ingredient-list">
+            <li v-for="ing in cocktail.ingredients" :key="ing.name">
+              <span v-if="ing.amount" class="ingredient-amount">{{ ing.amount }}</span>
+              <span class="ingredient-name">{{ ing.name }}</span>
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -446,34 +430,31 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   border-radius: 6px;
   font-size: 0.875rem;
 }
-.suggestions-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.suggestions-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .suggestion-row {
   border: 1px solid var(--p-surface-border);
-  border-radius: 6px;
-  overflow: hidden;
+  border-radius: 8px;
   background-color: var(--p-surface-card);
-}
-.suggestion-row.expanded { border-color: var(--p-primary-color); }
-.suggestion-summary {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-}
-.suggestion-thumb {
-  width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;
-}
-.suggestion-name { font-weight: 500; }
-.suggestion-details {
-  padding: 0.5rem 0.75rem 0.75rem;
-  border-top: 1px solid var(--p-surface-border);
+  padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.recipe-text { margin: 0; font-size: 0.875rem; line-height: 1.4; }
+.suggestion-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+.suggestion-thumb {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;
+}
+.suggestion-name { font-weight: 500; font-size: 1rem; }
+.recipe-text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
 .ingredient-list {
   list-style: none;
   margin: 0;
@@ -483,5 +464,10 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   gap: 0.25rem;
   font-size: 0.875rem;
 }
-.ingredient-amount { font-weight: 500; margin-right: 0.5rem; }
+.ingredient-amount {
+  font-weight: 500;
+  margin-right: 0.5rem;
+  display: inline-block;
+  min-width: 4rem;
+}
 </style>
