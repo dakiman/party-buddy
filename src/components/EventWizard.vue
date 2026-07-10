@@ -12,6 +12,7 @@ import MusicStep from './steps/MusicStep.vue'
 import DrinksAndFoodStep from './steps/DrinksAndFoodStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { useWizardStore } from '@/stores/wizard'
+import { formatLocalDate, formatLocalTime } from '@/utils/datetime'
 import { createEvent, updateEvent } from '@/services/events'
 import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
@@ -119,14 +120,10 @@ const handleFinish = async () => {
         name: wizardStore.formData.name,
         isPrivate: wizardStore.formData.isPrivate,
         date: wizardStore.formData.date
-          ? wizardStore.formData.date.toISOString().split('T')[0]
+          ? formatLocalDate(wizardStore.formData.date)
           : '',
         time: wizardStore.formData.time
-          ? wizardStore.formData.time.toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+          ? formatLocalTime(wizardStore.formData.time)
           : undefined,
         location: wizardStore.formData.location
           ? {
@@ -163,14 +160,10 @@ const handleFinish = async () => {
         name: wizardStore.formData.name,
         isPrivate: wizardStore.formData.isPrivate,
         date: wizardStore.formData.date
-          ? wizardStore.formData.date.toISOString().split('T')[0]
+          ? formatLocalDate(wizardStore.formData.date)
           : '',
         time: wizardStore.formData.time
-          ? wizardStore.formData.time.toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+          ? formatLocalTime(wizardStore.formData.time)
           : undefined,
         location: wizardStore.formData.location
           ? {

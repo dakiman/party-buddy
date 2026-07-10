@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "TZ=Europe/Skopje vitest run"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",
@@ -29,6 +30,7 @@
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.7.2",
     "vite": "^6.1.0",
+    "vitest": "^4.1.10",
     "vue-tsc": "^2.2.0"
   }
 }
