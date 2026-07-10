@@ -39,6 +39,7 @@ npm run build
 |-------------------|----------------------------|--------------|--------------------------------------------------------------------|
 | `VITE_API_URL`    | `http://localhost:8080`    | (empty)      | Backend base URL; in prod the FE uses same-origin via reverse proxy |
 | `VITE_API_PREFIX` | (empty)                    | `/api`       | Path prefix appended to `VITE_API_URL`                             |
+| `VITE_GOOGLE_MAPS_API_KEY` | (unset — map picker disabled) | build arg | Google Maps JS API key; referrer-restricted, baked into the bundle at build time |
 
 Copy `.env.example` to `.env.development.local` or `.env.production.local` to override locally.
 
