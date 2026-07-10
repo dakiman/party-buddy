@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, markRaw } from "vue";
 import type { User } from "@/types";
 import api from "@/services/api";
 
@@ -8,6 +8,22 @@ export const useAuthStore = defineStore("auth", () => {
   const token = ref<string | null>(null);
 
   const isAuthenticated = computed(() => !!token.value);
+
+  /** True once the init GET /auth/user has settled (or no token was stored). */
+  const initialized = ref(false);
+  let resolveReady!: () => void;
+  // markRaw: pinia wraps the store in reactive(), and awaiting a
+  // reactive-proxied Promise throws — the promise must stay raw.
+  const ready = markRaw(
+    new Promise<void>((resolve) => {
+      resolveReady = resolve;
+    }),
+  );
+
+  function markReady() {
+    initialized.value = true;
+    resolveReady();
+  }
 
   async function login(username: string, password: string) {
     try {
@@ -61,12 +77,17 @@ export const useAuthStore = defineStore("auth", () => {
       })
       .catch(() => {
         logout();
-      });
+      })
+      .finally(markReady);
+  } else {
+    markReady();
   }
 
   return {
     user,
     isAuthenticated,
+    initialized,
+    ready,
     login,
     register,
     logout,

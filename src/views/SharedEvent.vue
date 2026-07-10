@@ -43,6 +43,9 @@ async function load() {
   viewerState.value = null
   event.value = null
 
+  // canEdit depends on authStore.user — settle auth before first render.
+  await authStore.ready
+
   try {
     const [vsResult, evResult] = await Promise.allSettled([
       getViewerState(token),

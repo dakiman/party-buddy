@@ -19,7 +19,10 @@ const wizardRef = ref<InstanceType<typeof EventWizard> | null>(null)
 onMounted(async () => {
   const id = Number(route.params.id)
   try {
-    const fetched = await getEvent(id)
+    // Wait for the auth store's init GET /auth/user alongside the event fetch —
+    // on a hard reload authStore.user is otherwise still null here and the
+    // creator gets bounced off their own edit page.
+    const [fetched] = await Promise.all([getEvent(id), authStore.ready])
 
     // Only the creator may edit. If another authenticated user navigates here
     // directly, redirect them to the read-only event view.

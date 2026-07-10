@@ -26,7 +26,10 @@ const canEdit = computed(
 onMounted(async () => {
   try {
     const id = Number(route.params.id)
-    event.value = await getEvent(id)
+    // authStore.ready: canEdit depends on authStore.user; without this the
+    // Edit/Delete buttons pop in after the page has already rendered.
+    const [fetched] = await Promise.all([getEvent(id), authStore.ready])
+    event.value = fetched
   } catch {
     toast.add({
       severity: 'error', summary: 'Error',
