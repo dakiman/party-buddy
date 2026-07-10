@@ -44,6 +44,28 @@ const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
     })
 }
 
+// Single marker-creation path so every marker gets the dragend listener,
+// regardless of whether it was created at mount, by map click, or by the
+// external modelValue watch.
+const placeMarker = (position: google.maps.LatLng | google.maps.LatLngLiteral) => {
+    if (marker.value) {
+        marker.value.setPosition(position)
+        return
+    }
+    marker.value = new google.maps.Marker({
+        position,
+        map: map.value!,
+        draggable: true
+    })
+    marker.value.addListener('dragend', () => {
+        const latLng = marker.value!.getPosition()!
+        emit('update:modelValue', {
+            lat: latLng.lat(),
+            lng: latLng.lng()
+        })
+    })
+}
+
 // Initialize Google Maps
 onMounted(async () => {
     const loader = new Loader({
@@ -64,43 +86,18 @@ onMounted(async () => {
 
         // If we have an initial location, show the marker
         if (props.modelValue) {
-            marker.value = new google.maps.Marker({
-                position: props.modelValue,
-                map: map.value,
-                draggable: true
-            })
+            placeMarker(props.modelValue)
         }
 
         // Add click listener to map
         map.value.addListener('click', (e: google.maps.MapMouseEvent) => {
             const latLng = e.latLng!
-
-            if (marker.value) {
-                marker.value.setPosition(latLng)
-            } else {
-                marker.value = new google.maps.Marker({
-                    position: latLng,
-                    map: map.value!,
-                    draggable: true
-                })
-            }
-
+            placeMarker(latLng)
             emit('update:modelValue', {
                 lat: latLng.lat(),
                 lng: latLng.lng()
             })
         })
-
-        // Add drag end listener to marker
-        if (marker.value) {
-            marker.value.addListener('dragend', () => {
-                const latLng = marker.value!.getPosition()!
-                emit('update:modelValue', {
-                    lat: latLng.lat(),
-                    lng: latLng.lng()
-                })
-            })
-        }
     } catch (error) {
         console.error('Error loading Google Maps:', error)
     }
@@ -109,17 +106,7 @@ onMounted(async () => {
 // Watch for external value changes
 watch(() => props.modelValue, (newValue) => {
     if (!map.value || !newValue) return
-
-    if (marker.value) {
-        marker.value.setPosition(newValue)
-    } else {
-        marker.value = new google.maps.Marker({
-            position: newValue,
-            map: map.value,
-            draggable: true
-        })
-    }
-
+    placeMarker(newValue)
     map.value.panTo(newValue)
 }, { deep: true })
 </script>
