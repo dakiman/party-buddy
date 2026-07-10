@@ -44,8 +44,7 @@ Copy `.env.example` to `.env.development.local` or `.env.production.local` to ov
 
 ## Deployment
 
-Deployed on the user's personal server (`dakis-server`). The build artifact (`dist/`) is mounted into an `nginx:alpine` container declared in `/home/dakiman/dakis-server/docker-compose.yml`. See the roadmap spec for the full deploy story:
-`/home/dakiman/projects/party-docs/specs/2026-04-28-party-app-roadmap-design.md`
+Deployed on the user's personal server (`dakis-server-v2`) via `/srv/dakis/apps/party-buddy/compose.yml` — service `party-buddy-fe` on :8094, built from this repo's `Dockerfile` (nginx serving the Vite build).
 
 The previous VPS deploy workflow in `.github/workflows/frontend-deploy.yml` has been removed.
 
@@ -84,4 +83,4 @@ See [`CLAUDE.md`](./CLAUDE.md).
 
 ## Roadmap
 
-`/home/dakiman/projects/party-docs/specs/2026-04-28-party-app-roadmap-design.md`
+The roadmap/specs repo (`party-docs`) was lost with the old host (decommissioned June 2026). Phase history survives in the "Phase N" sections of [`CLAUDE.md`](./CLAUDE.md) and in git history.

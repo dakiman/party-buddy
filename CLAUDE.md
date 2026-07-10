@@ -122,4 +122,4 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 
 ## Roadmap
 
-`/home/dakiman/projects/party-docs/specs/2026-04-28-party-app-roadmap-design.md`
+The roadmap/specs repo (`~/projects/party-docs`) was **lost with the old host** (decommissioned June 2026) — do not try to open those paths. Phase history survives only in the "Phase N" sections above and in git history.
