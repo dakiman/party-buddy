@@ -15,11 +15,12 @@ const showContinueButton = computed(() => selectedType.value !== null)
 
 const selectType = (type: 'private' | 'public') => {
   selectedType.value = type
-  wizardStore.updateFormData({ isPrivate: type === 'private' })
 }
 
 const handleContinue = () => {
+  if (!selectedType.value) return
   wizardStore.updateFormData({
+    isPrivate: selectedType.value === 'private',
     enabledSteps: {
       music: enableMusic.value,
       drinksAndFood: enableDrinksAndFood.value
