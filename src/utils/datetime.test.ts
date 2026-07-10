@@ -14,6 +14,9 @@ describe('formatLocalDate', () => {
 
   it('does not shift to the previous UTC day (toISOString regression)', () => {
     const localMidnight = new Date(2026, 6, 15)
+    // Only meaningful in a UTC+ zone (npm test pins TZ=Europe/Skopje);
+    // in UTC/UTC- the local and ISO dates legitimately coincide.
+    if (localMidnight.getTimezoneOffset() >= 0) return
     expect(formatLocalDate(localMidnight)).not.toBe(localMidnight.toISOString().split('T')[0])
   })
 })
