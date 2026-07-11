@@ -127,11 +127,13 @@ function showRegister() {
   <RegisterModal ref="registerModal" />
 </template>
 
-<style>
+<style scoped>
+/* .user-menu rules live in src/assets/main.css — the popup Menu
+   teleports to <body> (appendTo="body"), out of reach of scoped styles (R3). */
 .app-header {
   width: 100%;
-  background: var(--surface-card);
-  border-bottom: 1px solid var(--surface-border);
+  background: var(--p-content-background);
+  border-bottom: 1px solid var(--p-content-border-color);
   padding: 0.5rem 1rem;
 }
 
@@ -177,40 +179,7 @@ function showRegister() {
 }
 
 .desktop-menu-trigger:hover {
-  background-color: var(--surface-hover);
-}
-
-.user-menu {
-  background-color: #1E1E1E;
-  border: 1px solid var(--surface-border);
-  border-radius: 6px;
-  padding: 0.5rem;
-  min-width: 200px;
-  z-index: 1000;
-}
-
-.user-menu .p-menuitem-link {
-  padding: 0.75rem 1rem;
-  color: var(--text-color);
-  border-radius: 4px;
-}
-
-.user-menu .p-menuitem-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.user-menu .p-menuitem-icon {
-  color: var(--text-color);
-  margin-right: 0.75rem;
-}
-
-.user-menu .p-menuitem-text {
-  color: var(--text-color);
-}
-
-.user-menu .p-separator {
-  border-top: 1px solid var(--surface-border);
-  margin: 0.5rem 0;
+  background-color: var(--p-content-hover-background);
 }
 
 /* Tablet and up */
@@ -232,7 +201,7 @@ function showRegister() {
 }
 
 .header-nav .nav-link {
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
   text-decoration: none;
   font-size: 0.95rem;
   padding: 0.4rem 0.5rem;

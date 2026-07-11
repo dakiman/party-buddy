@@ -102,7 +102,7 @@ const openLoginModal = () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .home {
   padding: 2rem;
 }
@@ -120,7 +120,7 @@ const openLoginModal = () => {
 }
 
 .unauthenticated p {
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
   margin-bottom: 2rem;
 }
 
@@ -158,7 +158,7 @@ const openLoginModal = () => {
 .error {
   text-align: center;
   padding: 3rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -87,9 +87,9 @@ function confirmDelete() {
   </div>
 </template>
 
-<style>
+<style scoped>
 .event-view { max-width: 800px; margin: 0 auto; padding: 2rem; }
 .loading-state, .error-state {
-  text-align: center; padding: 3rem; color: var(--p-text-secondary-color);
+  text-align: center; padding: 3rem; color: var(--p-text-muted-color);
 }
 </style>

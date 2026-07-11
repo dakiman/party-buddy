@@ -280,7 +280,9 @@ onBeforeUnmount(() => {
     </div>
 </template>
 
-<style>
+<style scoped>
+/* .p-autocomplete panel rules live in src/assets/main.css — the overlay
+   teleports to <body> (appendTo="body"), out of reach of scoped styles (R3). */
 .music-step {
     min-height: 300px;
     display: flex;
@@ -341,40 +343,21 @@ onBeforeUnmount(() => {
     width: 100%;
 }
 
-.p-autocomplete-input {
+:deep(.p-autocomplete-input) {
     width: 100%;
     background-color: transparent;
-    border: 1px solid var(--p-surface-border);
+    border: 1px solid var(--p-content-border-color);
     color: var(--p-text-color);
 }
 
-.p-autocomplete-panel {
-    background-color: var(--p-surface-overlay);
-    border: 1px solid var(--p-surface-border);
-    color: var(--p-text-color);
-}
-
-.p-autocomplete-items {
-    padding: 0.5rem;
-}
-
-.p-autocomplete-item {
-    padding: 0;
-    border-radius: 6px;
-}
-
-.p-autocomplete-item:hover {
-    background-color: var(--p-surface-hover);
-}
-
-.p-autocomplete-token {
-    background-color: var(--primary-color);
+:deep(.p-autocomplete-token) {
+    background-color: var(--p-primary-color);
     border-radius: 4px;
     margin: 2px;
     padding: 0;
 }
 
-.p-autocomplete-token-icon {
+:deep(.p-autocomplete-token-icon) {
     display: none;
 }
 
@@ -394,7 +377,7 @@ onBeforeUnmount(() => {
     gap: 0.75rem;
     width: 100%;
     padding: 0.6rem 0.75rem;
-    border: 1px solid var(--p-surface-border);
+    border: 1px solid var(--p-content-border-color);
     border-radius: 8px;
     background: transparent;
     color: var(--p-text-color);
@@ -406,7 +389,7 @@ onBeforeUnmount(() => {
 
 .artist-row:hover,
 .artist-row:focus-visible {
-    background: var(--p-surface-hover);
+    background: var(--p-content-hover-background);
     border-color: var(--p-primary-color);
     outline: none;
 }
@@ -427,7 +410,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--p-surface-border);
+    background: var(--p-content-border-color);
     color: var(--p-text-muted-color, #888);
 }
 
@@ -489,16 +472,16 @@ onBeforeUnmount(() => {
 .artist-row-remove:hover,
 .artist-row-remove:focus-visible {
     opacity: 1;
-    background: var(--p-surface-hover);
+    background: var(--p-content-hover-background);
     outline: none;
 }
 
 .artist-row-expansion {
     margin-top: 0.5rem;
     padding: 0.75rem;
-    border: 1px solid var(--p-surface-border);
+    border: 1px solid var(--p-content-border-color);
     border-radius: 8px;
-    background: var(--p-surface-card, transparent);
+    background: var(--p-content-background, transparent);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -513,18 +496,6 @@ onBeforeUnmount(() => {
 @media (max-width: 767px) {
     .artist-row-image { width: 2.5rem; height: 2.5rem; }
     .artist-row-name { font-size: 0.875rem; }
-}
-
-.p-dialog-header {
-    padding: 1.5rem;
-    background-color: transparent;
-    border-bottom: none;
-    color: var(--p-text-color);
-    font-family: 'Outfit', sans-serif;
-}
-
-.p-dialog-header-close {
-    color: var(--p-text-color);
 }
 
 .tracks-loading {
@@ -560,9 +531,9 @@ onBeforeUnmount(() => {
     transition: background 0.15s;
 }
 
-.track-row:hover { background: var(--p-surface-hover); }
+.track-row:hover { background: var(--p-content-hover-background); }
 
-.track-row-active { background: var(--p-surface-hover); }
+.track-row-active { background: var(--p-content-hover-background); }
 
 .track-cover {
     width: 2.25rem;
@@ -576,7 +547,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--p-surface-border);
+    background: var(--p-content-border-color);
     color: var(--p-text-muted-color, #888);
 }
 
@@ -630,7 +601,7 @@ onBeforeUnmount(() => {
     align-items: center;
     gap: 0.4rem;
     padding: 0.75rem 0.5rem;
-    border: 1px solid var(--p-surface-border);
+    border: 1px solid var(--p-content-border-color);
     border-radius: 8px;
     background: transparent;
     color: var(--p-text-color);
@@ -641,7 +612,7 @@ onBeforeUnmount(() => {
 
 .similar-card:hover {
     border-color: var(--p-primary-color);
-    background: var(--p-surface-hover);
+    background: var(--p-content-hover-background);
 }
 
 .similar-image {
@@ -655,7 +626,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--p-surface-border);
+    background: var(--p-content-border-color);
     color: var(--p-text-muted-color, #888);
 }
 
@@ -681,7 +652,7 @@ onBeforeUnmount(() => {
     text-align: center;
     color: var(--p-text-muted-color, #888);
     font-size: 0.875rem;
-    border: 1px dashed var(--p-surface-border);
+    border: 1px dashed var(--p-content-border-color);
     border-radius: 8px;
 }
 

@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .discover {
   max-width: 1100px;
   margin: 0 auto;
@@ -175,12 +175,12 @@ onBeforeUnmount(() => {
 .discover .state {
   text-align: center;
   padding: 3rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
 }
 
 .discover .skeleton-card {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1rem 1.25rem;
   display: flex;

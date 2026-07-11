@@ -6,6 +6,7 @@ import PrimeVue from "primevue/config";
 import Lara from "@primevue/themes/lara";
 import { definePreset } from "@primevue/themes";
 import "primeicons/primeicons.css";
+import "@/assets/main.css";
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
 import ConfirmationService from "primevue/confirmationservice";

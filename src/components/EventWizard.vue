@@ -214,7 +214,7 @@ defineExpose({
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" modal :style="{ width: '90vw', maxWidth: '800px' }" :closable="true" @hide="close">
+  <Dialog v-model:visible="visible" modal class="event-wizard-dialog" :style="{ width: '90vw', maxWidth: '800px' }" :closable="true" @hide="close">
     <template #header>
       <h2 class="wizard-title">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h2>
     </template>
@@ -285,7 +285,11 @@ defineExpose({
   </Dialog>
 </template>
 
-<style>
+<style scoped>
+/* Dialog chrome (.p-dialog* / .event-wizard-dialog) lives in
+   src/assets/main.css — the dialog teleports to <body>, out of reach of
+   scoped styles (R3). The .review-* rules were duplicates of ReviewStep's
+   own scoped styles and were dropped here. */
 .wizard-title {
   margin: 0;
   font-size: 1.5rem;
@@ -297,84 +301,6 @@ defineExpose({
   justify-content: space-between;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--p-surface-border);
-}
-
-.details-step,
-.review-step {
-  min-height: 300px;
-}
-
-.p-dialog {
-  border-radius: 8px;
-}
-
-.p-dialog-header {
-  padding: 1.5rem;
-  background-color: transparent;
-  border-bottom: 1px solid var(--surface-border);
-  color: var(--text-color);
-}
-
-.p-dialog-content {
-  padding: 15px;
-  background-color: transparent;
-  color: var(--text-color);
-}
-
-.review-step {
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.review-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.review-section h4 {
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--p-text-color);
-  margin-bottom: 0.5rem;
-}
-
-.review-field {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.review-field label {
-  font-weight: 500;
-  color: var(--p-text-color);
-  min-width: 120px;
-}
-
-.review-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.review-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  background-color: var(--p-primary-color);
-  color: var(--primary-color-text);
-  border-radius: 1rem;
-  font-size: 0.875rem;
-}
-
-.review-chip .chip-image {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  object-fit: cover;
+  border-top: 1px solid var(--p-content-border-color);
 }
 </style>

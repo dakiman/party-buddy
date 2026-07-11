@@ -89,6 +89,6 @@ function onWizardClose() {
 .loading-state {
   text-align: center;
   padding: 3rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
 }
 </style>

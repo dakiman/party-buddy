@@ -84,8 +84,8 @@ watch(() => props.eventId, load)
 
 <style scoped>
 .pending-list {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1.5rem;
   margin-top: 1rem;
@@ -94,11 +94,11 @@ watch(() => props.eventId, load)
 .request-row {
   display: flex; justify-content: space-between; align-items: center;
   padding: 0.75rem 0;
-  border-top: 1px solid var(--p-surface-border);
+  border-top: 1px solid var(--p-content-border-color);
 }
 .request-row:first-of-type { border-top: 0; }
 .identity { font-weight: 500; }
-.note { color: var(--p-text-secondary-color); font-size: 0.9rem; margin-top: 0.25rem; }
-.meta { color: var(--p-text-secondary-color); font-size: 0.8rem; margin-top: 0.25rem; }
+.note { color: var(--p-text-muted-color); font-size: 0.9rem; margin-top: 0.25rem; }
+.meta { color: var(--p-text-muted-color); font-size: 0.8rem; margin-top: 0.25rem; }
 .actions { display: flex; gap: 0.5rem; }
 </style>

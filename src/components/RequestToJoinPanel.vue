@@ -51,11 +51,11 @@ async function onClick() {
 
 <style scoped>
 .request-panel {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1.5rem;
   text-align: center;
 }
-.request-panel p { color: var(--p-text-secondary-color); margin: 0 0 1rem 0; }
+.request-panel p { color: var(--p-text-muted-color); margin: 0 0 1rem 0; }
 </style>

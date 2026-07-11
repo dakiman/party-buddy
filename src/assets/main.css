@@ -1,0 +1,114 @@
+/*
+ * Intentional global styles (R3).
+ *
+ * Everything here either applies app-wide by design (typography) or targets
+ * PrimeVue overlay components that teleport to <body> (dialogs, popup menus,
+ * autocomplete panels) — component-scoped styles and :deep() cannot reach
+ * teleported DOM, so these rules must stay global.
+ */
+
+* {
+  font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* ---- Dialog chrome (app-wide look; was duplicated unscoped in
+       LoginModal/RegisterModal/MusicStep before R3) ---- */
+
+.p-dialog {
+  background-color: #1E1E1E;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.p-dialog-header {
+  padding: 1.5rem;
+  background-color: transparent;
+  border-bottom: none;
+  color: var(--p-text-color);
+  font-family: 'Outfit', sans-serif;
+}
+
+.p-dialog-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  background-color: transparent;
+}
+
+.p-dialog-header-close {
+  color: var(--p-text-color);
+}
+
+.p-dialog-header-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.p-dialog-mask.p-overlay-mask {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Event wizard dialog deltas (was unscoped in EventWizard before R3) */
+.event-wizard-dialog .p-dialog-header {
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.event-wizard-dialog .p-dialog-content {
+  padding: 15px;
+  color: var(--p-text-color);
+}
+
+/* ---- AppHeader user menu (Menu popup, appendTo="body") ---- */
+
+.user-menu {
+  background-color: #1E1E1E;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.user-menu .p-menuitem-link {
+  padding: 0.75rem 1rem;
+  color: var(--p-text-color);
+  border-radius: 4px;
+}
+
+.user-menu .p-menuitem-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-menu .p-menuitem-icon {
+  color: var(--p-text-color);
+  margin-right: 0.75rem;
+}
+
+.user-menu .p-menuitem-text {
+  color: var(--p-text-color);
+}
+
+.user-menu .p-separator {
+  border-top: 1px solid var(--p-content-border-color);
+  margin: 0.5rem 0;
+}
+
+/* ---- AutoComplete overlay panel (appendTo="body"; was duplicated
+       unscoped in MusicStep/DrinksAndFoodStep before R3) ---- */
+
+.p-autocomplete-panel {
+  background-color: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
+  color: var(--p-text-color);
+}
+
+.p-autocomplete-items {
+  padding: 0.5rem;
+}
+
+.p-autocomplete-item {
+  padding: 0;
+  border-radius: 6px;
+}
+
+.p-autocomplete-item:hover {
+  background-color: var(--p-content-hover-background);
+}
