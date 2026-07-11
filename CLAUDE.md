@@ -73,6 +73,7 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 - **`types/index.ts`** has the `Event` interface fully commented out and `User` is the only real type. Most components use `any` for event data — Phase 1 fixes this.
 - **`EventWizard.vue` step values are stringified magic numbers** that branch on which optional steps are enabled. Fragile. Phase 1 refactors.
 - **Unified BE error contract (R1):** every non-2xx body is `{message: string, errors?: {field: why}}` (`errors` only on validation failures). Parse it with `getApiErrorMessage(error, fallback)` from `src/utils/errors.ts` — don't hand-roll `error.response?.data?.message` again. Mirrors the party-starter CLAUDE.md gotcha; change both sides together.
+- **Slim list payloads (R2):** `GET /events` and `GET /events/public` return the BE's `EventListResponse` — **no artists/drinks/ingredients/food** (an N+1 fix). `normalizeEvent` defaults the missing collections to `[]`, so list-derived `EventResponse` objects always have empty collections; anything that needs them must fetch the detail endpoint. Mirrors the party-starter CLAUDE.md gotcha; change both sides together.
 - **The `<meta viewport>` tag has `maximum-scale=1.0, user-scalable=no`** — accessibility issue. Phase 9 polish removes this.
 - **Dark mode is forced** — no light toggle. Phase 9 adds one.
 - **`PostEventRequest.drinks` carries cocktail IDs (not ingredient IDs)** as of Phase 7. The wizard's `cocktails: Cocktail[]` is mapped to `drinks: number[]` on submit; the old `drinks: []`-always behavior is gone.

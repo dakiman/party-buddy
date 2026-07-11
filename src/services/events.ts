@@ -13,15 +13,20 @@ interface RawEventArtist {
   popularity?: number
 }
 
+// Wire-level shape of an Event as returned by the BE — pre-normalization.
+// Detail endpoints (GET /events/:id, /events/share/:token) return the full
+// shape; the list endpoints (GET /events, GET /events/public) return the slim
+// EventListResponse (R2) WITHOUT artists/ingredients/food/drinks — hence all
+// four are optional and normalizeEvent defaults them to [].
 interface RawEventResponse {
   id: number
   name: string
   date: string
   time?: string
   location?: Location
-  artists: RawEventArtist[]
-  ingredients: Ingredient[]
-  food: string[]
+  artists?: RawEventArtist[]
+  ingredients?: Ingredient[]
+  food?: string[]
   isPrivate: boolean
   createdAt: string
   updatedAt: string
