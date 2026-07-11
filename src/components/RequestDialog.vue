@@ -56,7 +56,7 @@ async function onSubmit() {
     emit('submitted')
     emit('update:visible', false)
   } catch (e: unknown) {
-    const status = (e as { response?: { status?: number; data?: { message?: string } } })?.response?.status
+    const status = (e as { response?: { status?: number } })?.response?.status
     const message = getApiErrorMessage(e, 'Something went wrong. Please try again.')
     if (status === 503) {
       error.value = message

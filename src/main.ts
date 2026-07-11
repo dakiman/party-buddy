@@ -97,8 +97,12 @@ app.use(ToastService);
 app.use(ConfirmationService);
 app.component("Toast", Toast);
 
-// Install the 401 interceptor BEFORE mount — child views fire their first
-// requests from their own mounted hooks, which run before App.vue's onMounted.
+// Ordering is load-bearing, twice over:
+// 1. The store must be created BEFORE installAuthInterceptor — the store's init
+//    GET /auth/user must bypass the 401 interceptor (a cold load with an expired
+//    token should silently logout, not toast "Session expired" + redirect).
+// 2. Both must run BEFORE mount — child views fire their first requests from
+//    their own onMounted hooks, which run before App.vue's onMounted.
 const authStore = useAuthStore(pinia);
 installAuthInterceptor(authStore, router, app.config.globalProperties.$toast);
 
