@@ -30,6 +30,8 @@ Vue 3 SPA. Single root layout (`App.vue`) with a persistent header + `router-vie
 /events/:id/edit  EditEvent.vue     Edit event; fetches event, guards creator, opens EventWizard in edit mode
 ```
 
+`/create` and `/events/:id/edit` carry `meta: { requiresAuth: true }`; a `router.beforeEach` in `router/index.ts` redirects anonymous users to `/` (the check is the synchronous token-derived `isAuthenticated` — no `ready` await needed).
+
 ### Wizard flow
 
 `components/EventWizard.vue` is a PrimeVue `Dialog` containing a `Stepper` with up to 4 steps:
@@ -43,12 +45,12 @@ Step value strings (`"1"`, `"2"`, `"3"`, `"4"`) are computed dynamically based o
 
 ### Stores
 
-- **`useAuthStore`** (`stores/auth.ts`) — JWT in `localStorage` under key `token`. `login()`/`register()` POST to `/auth/*`; `logout()` clears state and storage. On store init, a stored token triggers a `GET /auth/user` to rehydrate; if it 401s, logout.
+- **`useAuthStore`** (`stores/auth.ts`) — JWT in `localStorage` under key `token`. `login()`/`register()` POST to `/auth/*`; `logout()` clears state and storage. On store init, a stored token triggers a `GET /auth/user` to rehydrate; if it 401s, logout. The store exposes `initialized` (ref) and `ready` (a `markRaw`'d promise — pinia's `reactive()` proxy breaks `await` on promises) that settle once that init call finishes; views whose render depends on `authStore.user` (creator checks, Edit/Delete visibility) must `await authStore.ready` before first paint.
 - **`useWizardStore`** (`stores/wizard.ts`) — In-progress event form data; reset on dialog close. Holds the full `WizardData` shape (name, date, time, location, artists, ingredients, cocktails, food, isPrivate, enabledSteps). The Phase 7 rename split the old `drinks` field into `ingredients` (alcohols on hand, picked from `/ingredients`) and `cocktails` (recipes opted-into from `/drinks?ingredients=...` suggestions); they map back to `CreateEventPayload.ingredients` and `.drinks` respectively on submit.
 
 ### API services
 
-`services/api.ts` is the shared axios instance. Base URL = `VITE_API_URL + VITE_API_PREFIX`. Request interceptor injects `Authorization: Bearer <token>` from `localStorage`. Response interceptor on 401 is currently empty — Phase 1 wires logout + toast + redirect.
+`services/api.ts` is the shared axios instance. Base URL = `VITE_API_URL + VITE_API_PREFIX`. Request interceptor injects `Authorization: Bearer <token>` from `localStorage`. The 401 response interceptor (`installAuthInterceptor`) is installed from `main.ts` before `app.mount()` — do not move it into a component lifecycle hook; child views fire requests from `onMounted` before `App.vue`'s own `onMounted` runs.
 
 `services/event.ts` and `services/music.ts` are sparse today — most API calls happen inline in components. Phase 1 extracts a typed client per resource (`events.ts`, `music.ts`, `drinks.ts`, `ingredients.ts`, `auth.ts`).
 
@@ -70,7 +72,7 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 
 - **`types/index.ts`** has the `Event` interface fully commented out and `User` is the only real type. Most components use `any` for event data — Phase 1 fixes this.
 - **`EventWizard.vue` step values are stringified magic numbers** that branch on which optional steps are enabled. Fragile. Phase 1 refactors.
-- **The 401 axios interceptor is empty** (`// Handle unauthorized` comment only). A token expiring silently leaves the user in a broken state until reload. Phase 1 wires it.
+- **Unified BE error contract (R1):** every non-2xx body is `{message: string, errors?: {field: why}}` (`errors` only on validation failures). Parse it with `getApiErrorMessage(error, fallback)` from `src/utils/errors.ts` — don't hand-roll `error.response?.data?.message` again. Mirrors the party-starter CLAUDE.md gotcha; change both sides together.
 - **The `<meta viewport>` tag has `maximum-scale=1.0, user-scalable=no`** — accessibility issue. Phase 9 polish removes this.
 - **Dark mode is forced** — no light toggle. Phase 9 adds one.
 - **`PostEventRequest.drinks` carries cocktail IDs (not ingredient IDs)** as of Phase 7. The wizard's `cocktails: Cocktail[]` is mapped to `drinks: number[]` on submit; the old `drinks: []`-always behavior is gone.
@@ -112,7 +114,7 @@ PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `define
 ### Phase 7 — Drink recipe surfacing (added 2026-05-02)
 
 - **Wizard store rename:** `WizardData.drinks` (which always held *ingredient* picks, not drinks — a long-standing UX lie) was renamed to `ingredients`. A new `cocktails: Cocktail[]` field holds the actual cocktails picked from the suggestions panel. On submit, `cocktails.map(c => c.id)` flows into `CreateEventPayload.drinks`. Internal-only — no API change.
-- **`IngredientPick`** (the wizard-side ingredient shape with `id: string`) is exported from both `@/types` and `@/stores/wizard` (the latter re-exports from the former). Always import from `@/types` in new code.
+- **`IngredientPick`** (the wizard-side ingredient shape with `id: number`) is exported from both `@/types` and `@/stores/wizard` (the latter re-exports from the former). Always import from `@/types` in new code.
 - **`EventResponse.drinks: Cocktail[]`** is now plumbed through the FE — `services/events.ts#normalizeEvent` populates it from the BE response. Previously the FE typed it as `unknown` and ignored it.
 - **`getDrinksByIngredients` axios serialization gotcha:** default axios array-param encoding is `?ingredients[]=foo` (PHP brackets), which Spring's `@RequestParam List<String>` silently ignores. The service comma-joins the array (`?ingredients=foo,bar`) so Spring parses it. If you add another endpoint that takes a list param, do the same.
 - **`DrinksAndFoodStep.vue`** below the alcohols-on-hand picker: a "Suggested cocktails" panel debounces 300 ms on alcoholic-ingredient changes, calls `/drinks?ingredients=...`, and renders rows as compact-with-recipe-preview. Click a row header (not the Add button) to expand inline → full recipe + ingredient amounts. The `expandedCocktailIds: Set<number>` reactivity uses the new-Set-on-mutation idiom (Vue 3 doesn't track `Set.add` in place).
