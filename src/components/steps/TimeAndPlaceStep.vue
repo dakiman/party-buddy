@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import Calendar from 'primevue/calendar'
+import DatePicker from 'primevue/datepicker'
 import Checkbox from 'primevue/checkbox'
 import GoogleMapPicker from '../GoogleMapPicker.vue'
 import { useWizardStore } from '@/stores/wizard'
@@ -200,7 +200,7 @@ defineExpose({ isValid, setTouched })
                         </button>
                     </div>
 
-                    <Calendar
+                    <DatePicker
                         :modelValue="wizardStore.formData.date"
                         @update:modelValue="updateDate"
                         :minDate="today"
@@ -231,7 +231,7 @@ defineExpose({ isValid, setTouched })
                     </div>
 
                     <div v-if="showCustomTime || isCustomTime" class="custom-time">
-                        <Calendar
+                        <DatePicker
                             :modelValue="wizardStore.formData.time"
                             @update:modelValue="updateTime"
                             timeOnly
@@ -244,7 +244,7 @@ defineExpose({ isValid, setTouched })
                             <template #inputicon="slotProps">
                                 <i class="pi pi-clock" @click="slotProps.clickCallback" />
                             </template>
-                        </Calendar>
+                        </DatePicker>
                     </div>
 
                     <div class="selection-summary" :class="{ 'is-empty': !selectionSummary }">
