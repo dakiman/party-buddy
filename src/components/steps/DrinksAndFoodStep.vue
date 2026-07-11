@@ -36,21 +36,26 @@ const foodOptions = [
 const getIngredientImageUrl = (name: string) =>
   `https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(name)}-Small.png`
 
+let ingredientSearchRequestId = 0
+
 const searchIngredients = async (event: { query: string }) => {
+  const requestId = ++ingredientSearchRequestId
   try {
     loadingIngredients.value = true
     const response = await api.get('/ingredients', {
       params: { isAlcoholic: true, name: event.query },
     })
+    if (requestId !== ingredientSearchRequestId) return // superseded
     const existingIds = selectedIngredients.value.map(i => i.id)
     ingredientSearchResults.value = response.data.ingredients.filter(
       (i: IngredientPick) => !existingIds.includes(i.id),
     )
   } catch (error) {
+    if (requestId !== ingredientSearchRequestId) return
     console.error('Error searching ingredients:', error)
     ingredientSearchResults.value = []
   } finally {
-    loadingIngredients.value = false
+    if (requestId === ingredientSearchRequestId) loadingIngredients.value = false
   }
 }
 
@@ -77,23 +82,32 @@ const ingredientNamesSorted = computed(() =>
   [...selectedIngredients.value.map(i => i.name)].sort().join(''),
 )
 
+let suggestionsRequestId = 0
+
 async function fetchSuggestions() {
+  const requestId = ++suggestionsRequestId
   if (selectedIngredients.value.length === 0) {
+    // Bumping the counter above also invalidates any in-flight fetch so a
+    // late response can't resurrect suggestions after the user cleared picks.
     suggestions.value = []
     suggestionsError.value = null
+    loadingSuggestions.value = false
     return
   }
   loadingSuggestions.value = true
   suggestionsError.value = null
   try {
-    suggestions.value = await getDrinksByIngredients(
+    const result = await getDrinksByIngredients(
       selectedIngredients.value.map(i => i.name),
     )
+    if (requestId !== suggestionsRequestId) return // superseded
+    suggestions.value = result
   } catch (e) {
+    if (requestId !== suggestionsRequestId) return
     console.error('Error loading cocktail suggestions:', e)
     suggestionsError.value = "Couldn't load suggestions"
   } finally {
-    loadingSuggestions.value = false
+    if (requestId === suggestionsRequestId) loadingSuggestions.value = false
   }
 }
 

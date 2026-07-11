@@ -27,17 +27,22 @@ const hasSearchedSimilar = ref(false)
 
 const currentWizardStep = inject<Ref<string>>('currentWizardStep')
 
+let artistSearchRequestId = 0
+
 const search = async (event: { query: string }) => {
+    const requestId = ++artistSearchRequestId
     try {
         loading.value = true
         const artists = await searchArtists(event.query)
+        if (requestId !== artistSearchRequestId) return // superseded
         const existingIds = selectedArtists.value.map(a => a.id)
         searchResults.value = artists.filter(a => !existingIds.includes(a.id))
     } catch (error) {
+        if (requestId !== artistSearchRequestId) return
         console.error('Error searching artists:', error)
         searchResults.value = []
     } finally {
-        loading.value = false
+        if (requestId === artistSearchRequestId) loading.value = false
     }
 }
 
