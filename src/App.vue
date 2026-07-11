@@ -1,25 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import LoginModal from '@/components/LoginModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
-import { useToast } from 'primevue/usetoast'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { installAuthInterceptor } from '@/services/api'
 
 const loginModal = ref()
 const registerModal = ref()
-
-const _toast = useToast()
-const _router = useRouter()
-const _authStore = useAuthStore()
-
-onMounted(() => {
-  installAuthInterceptor(_authStore, _router, _toast)
-})
 
 const handleShowLogin = () => {
   loginModal.value?.show()

@@ -9,6 +9,8 @@ import "primeicons/primeicons.css";
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
 import ConfirmationService from "primevue/confirmationservice";
+import { useAuthStore } from "@/stores/auth";
+import { installAuthInterceptor } from "@/services/api";
 
 const MyPreset = definePreset(Lara, {
   semantic: {
@@ -80,7 +82,8 @@ const MyPreset = definePreset(Lara, {
 
 const app = createApp(App);
 
-app.use(createPinia());
+const pinia = createPinia();
+app.use(pinia);
 app.use(router);
 app.use(PrimeVue, {
   theme: {
@@ -93,4 +96,10 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 app.component("Toast", Toast);
+
+// Install the 401 interceptor BEFORE mount — child views fire their first
+// requests from their own mounted hooks, which run before App.vue's onMounted.
+const authStore = useAuthStore(pinia);
+installAuthInterceptor(authStore, router, app.config.globalProperties.$toast);
+
 app.mount("#app");
