@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Calendar from 'primevue/calendar'
 import Checkbox from 'primevue/checkbox'
 import GoogleMapPicker from '../GoogleMapPicker.vue'
@@ -7,6 +7,15 @@ import { useWizardStore } from '@/stores/wizard'
 
 const wizardStore = useWizardStore()
 const includeLocation = ref(!!wizardStore.formData.location)
+
+// Unchecking must actually clear the data — otherwise the hidden pin and
+// description still submit with the event.
+watch(includeLocation, (checked) => {
+    if (!checked) {
+        wizardStore.updateFormData({ location: null, locationDescription: '' })
+    }
+})
+
 const touched = ref(false)
 const showCustomTime = ref(false)
 
