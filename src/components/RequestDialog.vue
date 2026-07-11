@@ -6,6 +6,7 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 import { submitJoinRequest } from '@/services/events'
+import { getApiErrorMessage } from '@/utils/errors'
 
 interface Props {
   visible: boolean
@@ -56,11 +57,11 @@ async function onSubmit() {
     emit('update:visible', false)
   } catch (e: unknown) {
     const status = (e as { response?: { status?: number; data?: { message?: string } } })?.response?.status
-    const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+    const message = getApiErrorMessage(e, 'Something went wrong. Please try again.')
     if (status === 503) {
-      error.value = message ?? 'Name unavailable, try a different name.'
+      error.value = message
     } else if (status === 400) {
-      error.value = message ?? 'Display name is required.'
+      error.value = message
     } else {
       toast.add({ severity: 'error', summary: 'Error', detail: 'Could not submit your request.', life: 3000 })
     }

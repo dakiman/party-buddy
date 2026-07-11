@@ -16,6 +16,7 @@ import { formatLocalDate, formatLocalTime } from '@/utils/datetime'
 import { createEvent, updateEvent } from '@/services/events'
 import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
+import { getApiErrorMessage } from '@/utils/errors'
 import type { CreateEventPayload, EventResponse, UpdateEventPayload } from '@/types'
 
 const props = withDefaults(defineProps<{
@@ -195,11 +196,11 @@ const handleFinish = async () => {
       close()
       router.push('/')
     }
-  } catch {
+  } catch (e) {
     toast.add({
       severity: 'error',
       summary: isEditMode.value ? 'Update Failed' : 'Creation Failed',
-      detail: 'Something went wrong. Please try again later.',
+      detail: getApiErrorMessage(e, 'Something went wrong. Please try again later.'),
       life: 5000,
     })
   } finally {

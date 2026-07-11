@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email, minLength } from '@vuelidate/validators'
+import { getApiErrorMessage } from '@/utils/errors'
 
 const authStore = useAuthStore()
 const toast = useToast()
@@ -50,7 +51,7 @@ async function handleSubmit() {
     visible.value = false
     resetForm()
   } catch (error: any) {
-    toast.add({ severity: 'error', summary: 'Error', detail: error.response?.data?.message || 'Registration failed', life: 3000 })
+    toast.add({ severity: 'error', summary: 'Error', detail: getApiErrorMessage(error, 'Registration failed'), life: 3000 })
   } finally {
     loading.value = false
   }
