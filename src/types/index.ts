@@ -43,12 +43,11 @@ export interface Track {
 
 /**
  * An ingredient as picked in the wizard's "Drinks (alcohols on hand)" step.
- * The picker filters to alcoholic ingredients only; this type reflects that
- * shape (id is the BE Integer, but the existing AutoComplete component
- * receives it as a string from JSON.parse).
+ * The picker filters to alcoholic ingredients only. `id` is the BE Integer id
+ * (numeric on the wire, same as `Ingredient.id`).
  */
 export interface IngredientPick {
-  id: string
+  id: number
   name: string
   type?: string
 }

@@ -81,7 +81,7 @@ function seedStoreFromEvent(event: EventResponse): void {
     locationDescription: event.location?.description ?? '',
     artists: event.artists,
     ingredients: (event.ingredients ?? []).map(i => ({
-      id: String(i.id),
+      id: i.id,
       name: i.name,
     })),
     cocktails: event.drinks ?? [],
@@ -139,7 +139,7 @@ const handleFinish = async () => {
           ? wizardStore.formData.cocktails.map(c => c.id)
           : [],
         ingredients: wizardStore.formData.enabledSteps.drinksAndFood
-          ? wizardStore.formData.ingredients.map(i => Number(i.id))
+          ? wizardStore.formData.ingredients.map(i => i.id)
           : [],
         food: wizardStore.formData.enabledSteps.drinksAndFood
           ? wizardStore.formData.food
@@ -179,7 +179,7 @@ const handleFinish = async () => {
           ? wizardStore.formData.cocktails.map(c => c.id)
           : [],
         ingredients: wizardStore.formData.enabledSteps.drinksAndFood
-          ? wizardStore.formData.ingredients.map(i => Number(i.id))
+          ? wizardStore.formData.ingredients.map(i => i.id)
           : [],
         food: wizardStore.formData.enabledSteps.drinksAndFood
           ? wizardStore.formData.food
