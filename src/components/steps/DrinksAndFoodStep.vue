@@ -392,23 +392,14 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
     width: 100%;
 }
 
-:deep(.p-autocomplete-input) {
+:deep(.p-autocomplete-input),
+:deep(.p-autocomplete-input-multiple) {
     width: 100%;
     background-color: transparent;
     border: 1px solid var(--p-content-border-color);
     color: var(--p-text-color);
 }
 
-:deep(.p-autocomplete-token) {
-    background-color: var(--p-primary-color);
-    border-radius: 4px;
-    margin: 2px;
-    padding: 0;
-}
-
-:deep(.p-autocomplete-token-icon) {
-    display: none;
-}
 
 /* Selected cocktails chip row */
 .chips-row {

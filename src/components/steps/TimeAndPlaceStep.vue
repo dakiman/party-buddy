@@ -448,6 +448,13 @@ defineExpose({ isValid, setTouched })
     display: flex;
 }
 
+/* The DatePicker's inner input is child-component DOM — the scoped
+   .p-inputtext rule above can't reach it without :deep(). */
+.custom-time :deep(.p-inputtext) {
+    width: 100%;
+    padding: 0.75rem;
+}
+
 .selection-summary {
     align-self: flex-start;
     display: inline-flex;
@@ -526,7 +533,7 @@ defineExpose({ isValid, setTouched })
     border: 1px solid var(--p-content-border-color);
 }
 
-.p-checkbox .p-checkbox-box.p-highlight {
+.p-checkbox.p-checkbox-checked :deep(.p-checkbox-box) {
     background-color: #7B7EF6;
     border-color: #7B7EF6;
 }
@@ -557,8 +564,8 @@ defineExpose({ isValid, setTouched })
     .when-card {
         padding: 0.75rem;
     }
-    .when-calendar .p-datepicker table,
-    .when-calendar .p-datepicker-panel table {
+    .when-calendar :deep(.p-datepicker table),
+    .when-calendar :deep(.p-datepicker-panel table) {
         font-size: 0.8rem;
     }
 }

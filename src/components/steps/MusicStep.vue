@@ -350,16 +350,6 @@ onBeforeUnmount(() => {
     color: var(--p-text-color);
 }
 
-:deep(.p-autocomplete-token) {
-    background-color: var(--p-primary-color);
-    border-radius: 4px;
-    margin: 2px;
-    padding: 0;
-}
-
-:deep(.p-autocomplete-token-icon) {
-    display: none;
-}
 
 /* Selected-artist accordion list */
 .artist-list {

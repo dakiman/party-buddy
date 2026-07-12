@@ -67,26 +67,26 @@
   z-index: 1000;
 }
 
-.user-menu .p-menuitem-link {
+.user-menu .p-menu-item-link {
   padding: 0.75rem 1rem;
   color: var(--p-text-color);
   border-radius: 4px;
 }
 
-.user-menu .p-menuitem-link:hover {
+.user-menu .p-menu-item-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.user-menu .p-menuitem-icon {
+.user-menu .p-menu-item-icon {
   color: var(--p-text-color);
   margin-right: 0.75rem;
 }
 
-.user-menu .p-menuitem-text {
+.user-menu .p-menu-item-label {
   color: var(--p-text-color);
 }
 
-.user-menu .p-separator {
+.user-menu .p-menu-separator {
   border-top: 1px solid var(--p-content-border-color);
   margin: 0.5rem 0;
 }
@@ -94,21 +94,21 @@
 /* ---- AutoComplete overlay panel (appendTo="body"; was duplicated
        unscoped in MusicStep/DrinksAndFoodStep before R3) ---- */
 
-.p-autocomplete-panel {
+.p-autocomplete-overlay {
   background-color: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
   color: var(--p-text-color);
 }
 
-.p-autocomplete-items {
+.p-autocomplete-list {
   padding: 0.5rem;
 }
 
-.p-autocomplete-item {
+.p-autocomplete-option {
   padding: 0;
   border-radius: 6px;
 }
 
-.p-autocomplete-item:hover {
+.p-autocomplete-option:hover {
   background-color: var(--p-content-hover-background);
 }

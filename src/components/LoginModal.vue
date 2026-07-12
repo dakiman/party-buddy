@@ -139,4 +139,9 @@ defineExpose({
 .login-button:hover {
   background-color: #6366F1;
 }
+
+.p-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+}
 </style>
