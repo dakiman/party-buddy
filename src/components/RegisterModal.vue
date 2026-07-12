@@ -138,7 +138,9 @@ defineExpose({
   </Dialog>
 </template>
 
-<style>
+<style scoped>
+/* Dialog chrome (.p-dialog*) lives in src/assets/main.css — the dialog
+   teleports to <body>, out of reach of scoped styles (R3). */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -152,14 +154,14 @@ defineExpose({
   gap: 0.5rem;
 }
 
-.p-password input,
+.p-password :deep(input),
 .p-inputtext {
   width: 100%;
   padding: 0.75rem;
 }
 
-.p-password i {
-  color: var(--text-color);
+.p-password :deep(i) {
+  color: var(--p-text-color);
 }
 
 .register-button {
@@ -173,35 +175,8 @@ defineExpose({
   background-color: #6366F1;
 }
 
-.p-dialog {
-  background-color: #1E1E1E;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.p-dialog-header {
-  padding: 1.5rem;
-  background-color: transparent;
-  border-bottom: none;
-  color: var(--text-color);
-  font-family: 'Outfit', sans-serif;
-}
-
-.p-dialog-content {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  background-color: transparent;
-}
-
-.p-dialog-header-close {
-  color: var(--text-color);
-}
-
-.p-dialog-header-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 .p-error {
   color: #ef4444;
   font-size: 0.875rem;
 }
-</style> 
+</style>

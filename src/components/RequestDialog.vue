@@ -119,7 +119,7 @@ async function onSubmit() {
 .request-dialog { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .field label { font-size: 0.9rem; color: var(--p-text-color); }
-.field small { color: var(--p-text-secondary-color); font-size: 0.8rem; }
+.field small { color: var(--p-text-muted-color); font-size: 0.8rem; }
 .field .req { color: var(--p-red-400); }
 .error { color: var(--p-red-400); font-size: 0.875rem; }
 .actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem; }

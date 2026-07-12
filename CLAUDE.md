@@ -15,7 +15,7 @@ npm run build
 npm run preview
 ```
 
-There are currently no automated tests on the FE. Adding a runner is Phase 9 polish (or earlier per a feature's needs).
+Tests run on Vitest (`npm test`, TZ-pinned to Europe/Skopje): `src/services/events.test.ts`, `src/stores/auth.test.ts`, `src/utils/errors.test.ts`, `src/utils/datetime.test.ts`. Keep them green; add colocated `*.test.ts` files for new logic.
 
 ## Architecture
 
@@ -56,7 +56,14 @@ Step value strings (`"1"`, `"2"`, `"3"`, `"4"`) are computed dynamically based o
 
 ### Styling / theme
 
-PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `definePreset` in `main.ts`. Dark mode is **hardcoded on** via `<html class="my-app-dark">` in `index.html`. The PrimeVue dark mode selector matches that class. Global font: `Outfit` from Google Fonts.
+PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `definePreset` in `main.ts`. Dark mode is **hardcoded on** via `<html class="my-app-dark">` in `index.html`. The PrimeVue dark mode selector matches that class. Global font: `Outfit` from Google Fonts (the only family loaded).
+
+As of R3:
+
+- **All component `<style>` blocks are `scoped`.** Rules that must escape scoping — dialog chrome, the AppHeader user menu, AutoComplete overlay panels (all `appendTo="body"` teleports that `:deep()` cannot reach) and base typography — live in `src/assets/main.css`. Put new teleported-overlay styling there, not in a component.
+- **Use PrimeVue v4 `--p-*` design tokens only** (`--p-text-color`, `--p-text-muted-color`, `--p-content-background`, `--p-content-border-color`, `--p-content-hover-background`, `--p-primary-color`, `--p-primary-contrast-color`, …). The v3 names (`--text-color`, `--surface-border`, …) and the fake p-prefixed variants (`--p-surface-border`, `--p-text-secondary-color`, …) resolve to nothing and were swept out in R3.
+- The wizard dialog carries the `event-wizard-dialog` class; its dialog-chrome overrides are keyed on it in `main.css`.
+- Each component owns its `.form-field` styles now — there is no global definition to inherit.
 
 ## Key conventions
 

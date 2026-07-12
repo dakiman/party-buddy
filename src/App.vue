@@ -31,22 +31,11 @@ const handleShowRegister = () => {
   </div>
 </template>
 
-<style>
-
-* {
-  font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  /* line-height: 1.5; */
-  font-weight: 400;
-}
-
+<style scoped>
+/* Global typography + dialog mask live in src/assets/main.css (R3). */
 .main-content {
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
 }
-
-.p-dialog-mask.p-overlay-mask {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
 </style>

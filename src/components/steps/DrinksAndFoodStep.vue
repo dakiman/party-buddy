@@ -301,7 +301,9 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   </div>
 </template>
 
-<style>
+<style scoped>
+/* .p-autocomplete panel rules live in src/assets/main.css — the overlay
+   teleports to <body> (appendTo="body"), out of reach of scoped styles (R3). */
 .drinks-food-step {
     min-height: 300px;
 }
@@ -356,7 +358,7 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
     gap: 0.5rem;
     padding: 0.125rem 0.5rem 0.125rem 0.5rem;
     background-color: var(--p-primary-color);
-    color: var(--primary-color-text);
+    color: var(--p-primary-contrast-color);
     border-radius: 1rem;
     font-size: 0.75rem;
     white-space: nowrap;
@@ -374,7 +376,7 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
     font-size: 0.75rem;
     padding: 0.25rem;
     margin-left: 0.25rem;
-    color: var(--primary-color-text);
+    color: var(--p-primary-contrast-color);
     opacity: 0.7;
     transition: opacity 0.2s;
     display: inline-flex;
@@ -390,42 +392,14 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
     width: 100%;
 }
 
-.p-autocomplete-input {
+:deep(.p-autocomplete-input),
+:deep(.p-autocomplete-input-multiple) {
     width: 100%;
     background-color: transparent;
-    border: 1px solid var(--p-surface-border);
+    border: 1px solid var(--p-content-border-color);
     color: var(--p-text-color);
 }
 
-.p-autocomplete-panel {
-    background-color: var(--p-surface-overlay);
-    border: 1px solid var(--p-surface-border);
-    color: var(--p-text-color);
-}
-
-.p-autocomplete-items {
-    padding: 0.5rem;
-}
-
-.p-autocomplete-item {
-    padding: 0;
-    border-radius: 6px;
-}
-
-.p-autocomplete-item:hover {
-    background-color: var(--p-surface-hover);
-}
-
-.p-autocomplete-token {
-    background-color: var(--p-primary-color);
-    border-radius: 4px;
-    margin: 2px;
-    padding: 0;
-}
-
-.p-autocomplete-token-icon {
-    display: none;
-}
 
 /* Selected cocktails chip row */
 .chips-row {
@@ -439,7 +413,7 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
   background-color: var(--p-primary-color);
-  color: var(--p-primary-color-text);
+  color: var(--p-primary-contrast-color);
   border-radius: 1rem;
   font-size: 0.875rem;
 }
@@ -458,15 +432,15 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--p-surface-100, #f3f4f6);
-  border: 1px dashed var(--p-surface-border);
+  border: 1px dashed var(--p-content-border-color);
   border-radius: 6px;
   font-size: 0.875rem;
 }
 .suggestions-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .suggestion-row {
-  border: 1px solid var(--p-surface-border);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
-  background-color: var(--p-surface-card);
+  background-color: var(--p-content-background);
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
@@ -509,7 +483,7 @@ watch([selectedIngredients, selectedCocktails, selectedFood],
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  border-top: 1px solid var(--p-surface-border);
+  border-top: 1px solid var(--p-content-border-color);
   margin-top: 0;
   padding-top: 0.625rem;
 }

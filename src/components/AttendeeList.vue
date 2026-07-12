@@ -69,8 +69,8 @@ const declined = computed(() => attendees.value.filter(a => a.status === 'DECLIN
 
 <style scoped>
 .attendee-list {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1.5rem;
   margin-top: 1rem;
@@ -79,5 +79,5 @@ const declined = computed(() => attendees.value.filter(a => a.status === 'DECLIN
 .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .col-header { font-weight: 600; margin-bottom: 0.5rem; }
 .row { padding: 0.25rem 0; font-size: 0.9rem; }
-.empty { color: var(--p-text-secondary-color); }
+.empty { color: var(--p-text-muted-color); }
 </style>

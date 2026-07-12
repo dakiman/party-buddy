@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import Calendar from 'primevue/calendar'
+import DatePicker from 'primevue/datepicker'
 import Checkbox from 'primevue/checkbox'
 import GoogleMapPicker from '../GoogleMapPicker.vue'
 import { useWizardStore } from '@/stores/wizard'
@@ -200,7 +200,7 @@ defineExpose({ isValid, setTouched })
                         </button>
                     </div>
 
-                    <Calendar
+                    <DatePicker
                         :modelValue="wizardStore.formData.date"
                         @update:modelValue="updateDate"
                         :minDate="today"
@@ -231,7 +231,7 @@ defineExpose({ isValid, setTouched })
                     </div>
 
                     <div v-if="showCustomTime || isCustomTime" class="custom-time">
-                        <Calendar
+                        <DatePicker
                             :modelValue="wizardStore.formData.time"
                             @update:modelValue="updateTime"
                             timeOnly
@@ -244,7 +244,7 @@ defineExpose({ isValid, setTouched })
                             <template #inputicon="slotProps">
                                 <i class="pi pi-clock" @click="slotProps.clickCallback" />
                             </template>
-                        </Calendar>
+                        </DatePicker>
                     </div>
 
                     <div class="selection-summary" :class="{ 'is-empty': !selectionSummary }">
@@ -289,7 +289,7 @@ defineExpose({ isValid, setTouched })
     </div>
 </template>
 
-<style>
+<style scoped>
 .time-place-step {
     display: flex;
     flex-direction: column;
@@ -302,7 +302,15 @@ defineExpose({ isValid, setTouched })
 
 .form-field label {
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--p-text-color);
+}
+
+/* Was inherited from LoginModal's pre-R3 unscoped .p-inputtext leak;
+   owned here now that styles are scoped. .location-description's own
+   input rule still wins its padding (higher specificity). */
+.p-inputtext {
+    width: 100%;
+    padding: 0.75rem;
 }
 
 .required {
@@ -321,8 +329,8 @@ defineExpose({ isValid, setTouched })
     gap: 1rem;
     padding: 1rem;
     margin-top: 0.5rem;
-    background: var(--surface-card);
-    border: 1px solid var(--surface-border);
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
     border-radius: 8px;
 }
 
@@ -349,8 +357,8 @@ defineExpose({ isValid, setTouched })
     align-items: center;
     gap: 0.4rem;
     background: transparent;
-    border: 1px solid var(--surface-border);
-    color: var(--text-color);
+    border: 1px solid var(--p-content-border-color);
+    color: var(--p-text-color);
     padding: 0.35rem 0.75rem;
     border-radius: 999px;
     font-size: 0.825rem;
@@ -393,8 +401,8 @@ defineExpose({ isValid, setTouched })
     overflow: hidden;
 }
 
-.when-calendar .p-datepicker,
-.when-calendar .p-datepicker-panel {
+.when-calendar :deep(.p-datepicker),
+.when-calendar :deep(.p-datepicker-panel) {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -403,23 +411,23 @@ defineExpose({ isValid, setTouched })
     box-sizing: border-box;
 }
 
-.when-calendar .p-datepicker table,
-.when-calendar .p-datepicker-panel table {
+.when-calendar :deep(.p-datepicker table),
+.when-calendar :deep(.p-datepicker-panel table) {
     width: 100%;
     table-layout: fixed;
     font-size: 0.85rem;
 }
 
-.when-calendar .p-datepicker table th,
-.when-calendar .p-datepicker table td,
-.when-calendar .p-datepicker-panel table th,
-.when-calendar .p-datepicker-panel table td {
+.when-calendar :deep(.p-datepicker table th),
+.when-calendar :deep(.p-datepicker table td),
+.when-calendar :deep(.p-datepicker-panel table th),
+.when-calendar :deep(.p-datepicker-panel table td) {
     padding: 0.25rem 0.1rem;
     text-align: center;
 }
 
-.when-calendar .p-datepicker-header,
-.when-calendar .p-datepicker-panel .p-datepicker-header {
+.when-calendar :deep(.p-datepicker-header),
+.when-calendar :deep(.p-datepicker-panel .p-datepicker-header) {
     flex-wrap: wrap;
     padding: 0.25rem 0;
     font-size: 0.9rem;
@@ -433,11 +441,18 @@ defineExpose({ isValid, setTouched })
 
 .time-label {
     font-size: 0.875rem;
-    color: var(--text-secondary-color);
+    color: var(--p-text-muted-color);
 }
 
 .custom-time {
     display: flex;
+}
+
+/* The DatePicker's inner input is child-component DOM — the scoped
+   .p-inputtext rule above can't reach it without :deep(). */
+.custom-time :deep(.p-inputtext) {
+    width: 100%;
+    padding: 0.75rem;
 }
 
 .selection-summary {
@@ -462,14 +477,14 @@ defineExpose({ isValid, setTouched })
 
 .selection-summary.is-empty {
     background: transparent;
-    border-color: var(--surface-border);
+    border-color: var(--p-content-border-color);
     border-style: dashed;
-    color: var(--text-secondary-color);
+    color: var(--p-text-muted-color);
     font-weight: 500;
 }
 
 .selection-summary.is-empty .pi {
-    color: var(--text-secondary-color);
+    color: var(--p-text-muted-color);
 }
 
 /* Desktop: two-column layout — calendar left, chips/time/summary right */
@@ -505,7 +520,7 @@ defineExpose({ isValid, setTouched })
 
 .location-description input {
     width: 100%;
-    color: var(--text-color);
+    color: var(--p-text-color);
     padding: 0.5rem;
     margin-top: 0.5rem;
 }
@@ -514,11 +529,11 @@ defineExpose({ isValid, setTouched })
     margin-top: 1rem;
 }
 
-.p-checkbox .p-checkbox-box {
-    border: 1px solid var(--surface-border);
+.p-checkbox :deep(.p-checkbox-box) {
+    border: 1px solid var(--p-content-border-color);
 }
 
-.p-checkbox .p-checkbox-box.p-highlight {
+.p-checkbox.p-checkbox-checked :deep(.p-checkbox-box) {
     background-color: #7B7EF6;
     border-color: #7B7EF6;
 }
@@ -540,7 +555,7 @@ defineExpose({ isValid, setTouched })
 }
 
 .helper-text {
-    color: var(--text-secondary-color);
+    color: var(--p-text-muted-color);
     font-size: 0.875rem;
     margin-left: 0.25rem;
 }
@@ -549,8 +564,8 @@ defineExpose({ isValid, setTouched })
     .when-card {
         padding: 0.75rem;
     }
-    .when-calendar .p-datepicker table,
-    .when-calendar .p-datepicker-panel table {
+    .when-calendar :deep(.p-datepicker table),
+    .when-calendar :deep(.p-datepicker-panel table) {
         font-size: 0.8rem;
     }
 }

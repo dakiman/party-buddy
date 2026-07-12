@@ -10,7 +10,7 @@ import EventTypeSelector from '@/components/EventTypeSelector.vue'
   </div>
 </template>
 
-<style>
+<style scoped>
 .create-event {
   text-align: center;
   padding: 2rem;
@@ -20,12 +20,12 @@ import EventTypeSelector from '@/components/EventTypeSelector.vue'
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
 
 .subtitle {
   font-size: 1.1rem;
-  color: var(--text-secondary-color);
+  color: var(--p-text-muted-color);
   margin-bottom: 2rem;
 }
 </style> 

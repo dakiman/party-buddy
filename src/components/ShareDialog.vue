@@ -182,6 +182,6 @@ function confirmRotate() {
 .share-loading {
   padding: 2rem;
   text-align: center;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
 }
 </style>

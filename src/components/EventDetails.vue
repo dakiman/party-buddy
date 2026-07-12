@@ -144,11 +144,11 @@ const shareDialogOpen = ref(false)
 }
 
 .event-section {
-  background: var(--p-surface-card);
+  background: var(--p-content-background);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid var(--p-surface-border);
+  border: 1px solid var(--p-content-border-color);
 }
 
 .event-section h2 {
@@ -194,7 +194,7 @@ const shareDialogOpen = ref(false)
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
   background-color: var(--p-primary-color);
-  color: var(--p-primary-color-text);
+  color: var(--p-primary-contrast-color);
   border-radius: 1rem;
   font-size: 0.875rem;
 }
@@ -218,10 +218,10 @@ const shareDialogOpen = ref(false)
   gap: 1rem;
 }
 .cocktail-card {
-  border: 1px solid var(--p-surface-border);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1rem;
-  background-color: var(--p-surface-card);
+  background-color: var(--p-content-background);
 }
 .cocktail-card-header {
   display: flex;

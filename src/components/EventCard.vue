@@ -46,8 +46,8 @@ function formatTime(t?: string): string | null {
   display: block;
   text-decoration: none;
   color: inherit;
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 8px;
   padding: 1rem 1.25rem;
   transition: border-color 120ms ease, transform 120ms ease;
@@ -67,7 +67,7 @@ function formatTime(t?: string): string | null {
 
 .card-meta {
   font-size: 0.875rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
   margin-bottom: 0.5rem;
 }
 
@@ -76,12 +76,12 @@ function formatTime(t?: string): string | null {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.875rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
   margin-bottom: 0.75rem;
 }
 
 .card-host {
   font-size: 0.8rem;
-  color: var(--p-text-secondary-color);
+  color: var(--p-text-muted-color);
 }
 </style>

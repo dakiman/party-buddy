@@ -93,7 +93,7 @@ const wizardStore = useWizardStore()
   </div>
 </template>
 
-<style>
+<style scoped>
 .review-step {
   min-height: 300px;
   display: flex;
@@ -138,7 +138,7 @@ const wizardStore = useWizardStore()
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
   background-color: var(--p-primary-color);
-  color: var(--primary-color-text);
+  color: var(--p-primary-contrast-color);
   border-radius: 1rem;
   font-size: 0.875rem;
 }

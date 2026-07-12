@@ -168,8 +168,8 @@ const showFullView = computed(
   </div>
 </template>
 
-<style>
+<style scoped>
 .shared-event { max-width: 800px; margin: 0 auto; padding: 2rem; }
-.shared-event .state { text-align: center; padding: 2rem; color: var(--p-text-secondary-color); }
+.shared-event .state { text-align: center; padding: 2rem; color: var(--p-text-muted-color); }
 .shared-event .pending-state { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 </style>
