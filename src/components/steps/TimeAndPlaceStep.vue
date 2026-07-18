@@ -543,9 +543,9 @@ defineExpose({ isValid, setTouched })
     gap: 0.5rem;
     padding: 0.45rem 0.95rem;
     border-radius: 999px;
-    background: #7B7EF6;
-    border: 1px solid #7B7EF6;
-    color: white;
+    background: var(--p-primary-color);
+    border: 1px solid var(--p-primary-color);
+    color: var(--p-primary-contrast-color);
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.2;
@@ -615,8 +615,8 @@ defineExpose({ isValid, setTouched })
 }
 
 .p-checkbox.p-checkbox-checked :deep(.p-checkbox-box) {
-    background-color: #7B7EF6;
-    border-color: #7B7EF6;
+    background-color: var(--p-primary-color);
+    border-color: var(--p-primary-color);
 }
 
 .fade-enter-active,

@@ -157,6 +157,14 @@ h1, h2, h3 {
   margin: 0.5rem 0;
 }
 
+/* ---- Toast (teleports to <body>) ---- */
+
+.p-toast .p-toast-message {
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 /* ---- AutoComplete overlay panel (appendTo="body"; was duplicated
        unscoped in MusicStep/DrinksAndFoodStep before R3) ---- */
 

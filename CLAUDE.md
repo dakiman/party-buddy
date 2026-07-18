@@ -24,24 +24,24 @@ Vue 3 SPA. Single root layout (`App.vue`) with a persistent header + `router-vie
 ### Routing
 
 ```
-/                Home.vue          Auth-gated event list; welcome view otherwise
-/create          CreateEvent.vue   Renders EventTypeSelector → opens EventWizard modal
+/                Home.vue          Auth-gated event list (upcoming/past groups); welcome hero otherwise
+/create          CreateEvent.vue   Renders EventWizard directly as a full page
 /events/:id      EventView.vue     Single event, read-only
-/events/:id/edit  EditEvent.vue     Edit event; fetches event, guards creator, opens EventWizard in edit mode
+/events/:id/edit  EditEvent.vue     Edit event; fetches event, guards creator, renders EventWizard (full page) in edit mode
 ```
 
 `/create` and `/events/:id/edit` carry `meta: { requiresAuth: true }`; a `router.beforeEach` in `router/index.ts` redirects anonymous users to `/` (the check is the synchronous token-derived `isAuthenticated` — no `ready` await needed).
 
 ### Wizard flow
 
-`components/EventWizard.vue` is a PrimeVue `Dialog` containing a `Stepper` with up to 4 steps:
+`components/EventWizard.vue` is a **full-page component** (UI redesign 2026-07 — it was a PrimeVue `Dialog` before) containing a `Stepper` with up to 4 steps:
 
-1. **Time & Place** (`steps/TimeAndPlaceStep.vue`) — required; Vuelidate validation
+1. **Time & Place** (`steps/TimeAndPlaceStep.vue`) — required; also carries the Private/Public type pills and the Music / Drinks & Food include-toggles (the old `EventTypeSelector.vue` pre-screen was deleted)
 2. **Music** (`steps/MusicStep.vue`) — optional, toggleable in step 1
 3. **Drinks & Food** (`steps/DrinksAndFoodStep.vue`) — optional, toggleable in step 1
-4. **Review** (`steps/ReviewStep.vue`) — always shown; "Finish" calls `createEvent`
+4. **Review** (`steps/ReviewStep.vue`) — always shown as a mini invitation preview; "Finish" calls `createEvent`/`updateEvent`
 
-Step value strings (`"1"`, `"2"`, `"3"`, `"4"`) are computed dynamically based on which optional steps are enabled. **This logic is brittle** — Phase 1 refactors it to named step keys.
+Steps are identified by named keys (`timeAndPlace` / `music` / `drinksAndFood` / `review`) via `activeSteps`/`nextStep`/`prevStep`. Lifecycle: seeding from `initialEvent` happens in `onMounted`; the store resets in `onUnmounted` (navigation away = reset). It emits `cancel`; the parent view navigates. There is no `show()`/`defineExpose` and no `@hide`.
 
 ### Stores
 
@@ -56,14 +56,16 @@ Step value strings (`"1"`, `"2"`, `"3"`, `"4"`) are computed dynamically based o
 
 ### Styling / theme
 
-PrimeVue 4 with the `Lara` preset, primary palette swapped to indigo via `definePreset` in `main.ts`. Dark mode is **hardcoded on** via `<html class="my-app-dark">` in `index.html`. The PrimeVue dark mode selector matches that class. Global font: `Outfit` from Google Fonts (the only family loaded).
+PrimeVue 4 with the `Lara` preset. The 2026-07 "dark lounge" redesign swaps primary to **violet** and defines a violet-tinted near-black dark surface ramp via `definePreset` in `main.ts`. The app is **dark-only by design decision** (the old Phase 9 light-toggle idea is dropped) — `<html class="my-app-dark">` in `index.html` stays hardcoded. Global font: `Outfit` from Google Fonts (weights 400–800, the only family loaded).
+
+App-level identity tokens live in `src/assets/main.css` under the `--pb-*` prefix: `--pb-accent-grad` (violet→magenta gradient), `--pb-glow`/`--pb-glow-soft` (violet box-shadows), `--pb-radius-card`, plus global utility classes `.pb-section-label` (uppercase-tracked heading), `.pb-pill`, `.pb-gradient-text`. Magenta (`--pb-accent-2`) is gradient/glow-only — never a standalone interactive color. The body carries a fixed radial-gradient vignette.
 
 As of R3:
 
 - **All component `<style>` blocks are `scoped`.** Rules that must escape scoping — dialog chrome, the AppHeader user menu, AutoComplete overlay panels (all `appendTo="body"` teleports that `:deep()` cannot reach) and base typography — live in `src/assets/main.css`. Put new teleported-overlay styling there, not in a component.
 - **Use PrimeVue v4 `--p-*` design tokens only** (`--p-text-color`, `--p-text-muted-color`, `--p-content-background`, `--p-content-border-color`, `--p-content-hover-background`, `--p-primary-color`, `--p-primary-contrast-color`, …). The v3 names (`--text-color`, `--surface-border`, …) and the fake p-prefixed variants (`--p-surface-border`, `--p-text-secondary-color`, …) resolve to nothing and were swept out in R3.
-- The wizard dialog carries the `event-wizard-dialog` class; its dialog-chrome overrides are keyed on it in `main.css`.
 - Each component owns its `.form-field` styles now — there is no global definition to inherit.
+- Popup `Menu` overlays share the `.user-menu`/`.pb-popup-menu` rules in `main.css`; `.pb-popup-menu .danger-item` renders a red menu item (used for Delete on the event page).
 
 ## Key conventions
 
@@ -77,14 +79,10 @@ As of R3:
 
 ## Gotchas
 
-- **`types/index.ts`** has the `Event` interface fully commented out and `User` is the only real type. Most components use `any` for event data — Phase 1 fixes this.
-- **`EventWizard.vue` step values are stringified magic numbers** that branch on which optional steps are enabled. Fragile. Phase 1 refactors.
 - **Unified BE error contract (R1):** every non-2xx body is `{message: string, errors?: {field: why}}` (`errors` only on validation failures). Parse it with `getApiErrorMessage(error, fallback)` from `src/utils/errors.ts` — don't hand-roll `error.response?.data?.message` again. Mirrors the party-starter CLAUDE.md gotcha; change both sides together.
 - **Slim list payloads (R2):** `GET /events` and `GET /events/public` return the BE's `EventListResponse` — **no artists/drinks/ingredients/food** (an N+1 fix). `normalizeEvent` defaults the missing collections to `[]`, so list-derived `EventResponse` objects always have empty collections; anything that needs them must fetch the detail endpoint. Mirrors the party-starter CLAUDE.md gotcha; change both sides together.
-- **The `<meta viewport>` tag has `maximum-scale=1.0, user-scalable=no`** — accessibility issue. Phase 9 polish removes this.
-- **Dark mode is forced** — no light toggle. Phase 9 adds one.
 - **`PostEventRequest.drinks` carries cocktail IDs (not ingredient IDs)** as of Phase 7. The wizard's `cocktails: Cocktail[]` is mapped to `drinks: number[]` on submit; the old `drinks: []`-always behavior is gone.
-- **`EventWizard` is dual-mode** — pass `:initialEvent="event"` to put it in edit mode. `show()` calls `seedStoreFromEvent()` internally before opening the dialog. `handleFinish` branches on `isEditMode`: edit mode calls `updateEvent(id, payload)` and navigates to `/events/:id`; create mode calls `createEvent(payload)` and navigates to `/`. The `close()` / store reset is mode-agnostic.
+- **`EventWizard` is dual-mode** — pass `:initialEvent="event"` to put it in edit mode. Seeding happens in the wizard's `onMounted`, so the parent must `v-if` the wizard until the event is loaded (see `EditEvent.vue`). `handleFinish` branches on `isEditMode`: edit mode calls `updateEvent(id, payload)` and navigates to `/events/:id`; create mode calls `createEvent(payload)` and navigates to `/`. Store reset happens in `onUnmounted`, mode-agnostic.
 - **`ConfirmDialog` must be mounted in `App.vue`** — PrimeVue's `useConfirm()` composable requires a single `<ConfirmDialog />` instance in the component tree and `ConfirmationService` installed on the Vue app. Both are now present. Do not add a second `<ConfirmDialog />` or the confirm callbacks will fire twice.
 - **`EventResponse.creatorUsername`** — the BE now includes `creatorUsername` on every event response. `EventView` and `EditEvent` use it to gate Edit/Delete visibility and to guard the edit route. The FE also relies on `authStore.user?.username` being populated (via `GET /auth/user` on store init).
 - **`deleteEvent` cascades on the BE** — the BE uses `eventRepository.delete(entity)` (not `deleteById`) so join-table rows (`event_artists`, `event_drinks`, `event_ingredients`, `event_food_items`) are cleared before the parent row is removed. The FE just calls `DELETE /events/{id}` and handles 204.
