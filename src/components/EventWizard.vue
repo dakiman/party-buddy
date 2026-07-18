@@ -323,8 +323,22 @@ const handleFinish = async () => {
 
 /* Mobile: numbers only for inactive steps — no truncated labels */
 @media screen and (max-width: 640px) {
+  .wizard-card {
+    padding: 1rem;
+  }
+
   .wizard-card :deep(.p-step:not(.p-step-active) .p-step-title) {
     display: none;
+  }
+
+  .wizard-card :deep(.p-step) {
+    gap: 0.35rem;
+    padding: 0.25rem;
+  }
+
+  .wizard-card :deep(.p-stepper-separator) {
+    min-width: 0.5rem;
+    margin: 0 0.25rem;
   }
 }
 
