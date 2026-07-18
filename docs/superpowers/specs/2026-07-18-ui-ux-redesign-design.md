@@ -42,7 +42,7 @@ One token layer, defined once, consumed everywhere:
 
 ### 4. Full-page wizard (`/create`, `/events/:id/edit`)
 - `EventWizard.vue` stops being a `Dialog`; it becomes a full-page component rendered directly by `CreateEvent.vue` and `EditEvent.vue`. `EventTypeSelector.vue` is deleted; event type (Private/Public) + optional-step toggles fold into step 1 as pill toggles.
-- **Step-key refactor** (the long-flagged Phase 1 brittleness): steps identified by named keys `'details' | 'music' | 'drinks' | 'review'`, with a computed visible-steps array; no more stringified magic numbers. Unit-test the visible-steps/navigation logic (colocated `*.test.ts`).
+- **Step-key note:** survey found the named-step-key refactor already implemented in `EventWizard.vue` (`STEP_KEYS`/`activeSteps` — the CLAUDE.md "stringified magic numbers" gotcha is stale). The wizard task is therefore the Dialog→page conversion; step navigation logic carries over unchanged.
 - Stepper restyle: compact numbered nodes with gradient active state; on mobile show numbers + current-step label only (no truncated labels).
 - `ReviewStep.vue`: mirror of the invitation layout in miniature (same icon rows/sections), not a label:value dump.
 - Dialog-specific chrome (`event-wizard-dialog` class rules in `main.css`) is removed with the dialog. Edit mode, store seeding, and `handleFinish` branching are unchanged.
