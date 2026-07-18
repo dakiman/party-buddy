@@ -34,7 +34,7 @@ const handleShowRegister = () => {
 <style scoped>
 /* Global typography + dialog mask live in src/assets/main.css (R3). */
 .main-content {
-  padding: 1rem;
+  padding: 1.5rem 1rem 4rem;
   max-width: 1200px;
   margin: 0 auto;
 }
