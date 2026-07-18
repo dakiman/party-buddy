@@ -271,7 +271,7 @@ const handleFinish = async () => {
           <ReviewStep />
           <div class="wizard-actions">
             <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('review'))" />
-            <Button label="Finish" severity="success" icon="pi pi-check" :loading="loading" @click="handleFinish" />
+            <Button label="Finish" icon="pi pi-check" class="finish-button" :loading="loading" @click="handleFinish" />
           </div>
         </StepPanel>
       </StepPanels>
@@ -334,5 +334,9 @@ const handleFinish = async () => {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--p-content-border-color);
+}
+
+.wizard-actions .finish-button {
+  box-shadow: var(--pb-glow);
 }
 </style>
