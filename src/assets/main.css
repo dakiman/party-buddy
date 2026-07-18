@@ -61,6 +61,7 @@ h1, h2, h3 {
 }
 
 .pb-gradient-text {
+  font-weight: inherit; /* the global `*` reset would force 400 */
   background: var(--pb-accent-grad);
   -webkit-background-clip: text;
   background-clip: text;
