@@ -153,6 +153,19 @@ const updateName = (event: Event) => {
     wizardStore.updateFormData({ name: value })
 }
 
+const setPrivate = (isPrivate: boolean) => {
+    wizardStore.updateFormData({ isPrivate })
+}
+
+function toggleInclude(key: 'music' | 'drinksAndFood') {
+    wizardStore.updateFormData({
+        enabledSteps: {
+            ...wizardStore.formData.enabledSteps,
+            [key]: !wizardStore.formData.enabledSteps[key],
+        },
+    })
+}
+
 const selectionSummary = computed(() => {
     const d = wizardStore.formData.date
     if (!d) return ''
@@ -170,6 +183,53 @@ defineExpose({ isValid, setTouched })
 
 <template>
     <div class="time-place-step">
+        <div class="form-field">
+            <label>What are we throwing?</label>
+            <div class="chip-row type-row">
+                <button
+                    type="button"
+                    class="chip chip-type"
+                    :class="{ 'chip-active': wizardStore.formData.isPrivate }"
+                    @click="setPrivate(true)"
+                >
+                    <i class="pi pi-lock" />
+                    <span>Private Party</span>
+                </button>
+                <button
+                    type="button"
+                    class="chip chip-type"
+                    :class="{ 'chip-active': !wizardStore.formData.isPrivate }"
+                    @click="setPrivate(false)"
+                >
+                    <i class="pi pi-globe" />
+                    <span>Public Event</span>
+                </button>
+            </div>
+            <div class="include-row">
+                <span class="include-label">Include:</span>
+                <button
+                    type="button"
+                    class="chip chip-include"
+                    :class="{ 'chip-active': wizardStore.formData.enabledSteps.music }"
+                    :aria-pressed="wizardStore.formData.enabledSteps.music"
+                    @click="toggleInclude('music')"
+                >
+                    <i :class="wizardStore.formData.enabledSteps.music ? 'pi pi-check' : 'pi pi-plus'" />
+                    <span>Music</span>
+                </button>
+                <button
+                    type="button"
+                    class="chip chip-include"
+                    :class="{ 'chip-active': wizardStore.formData.enabledSteps.drinksAndFood }"
+                    :aria-pressed="wizardStore.formData.enabledSteps.drinksAndFood"
+                    @click="toggleInclude('drinksAndFood')"
+                >
+                    <i :class="wizardStore.formData.enabledSteps.drinksAndFood ? 'pi pi-check' : 'pi pi-plus'" />
+                    <span>Drinks &amp; Food</span>
+                </button>
+            </div>
+        </div>
+
         <div class="form-field">
             <label>What's your event called? <span class="required">*</span></label>
             <input
@@ -369,22 +429,43 @@ defineExpose({ isValid, setTouched })
 
 .chip .pi {
     font-size: 0.8rem;
-    color: #7B7EF6;
+    color: var(--p-primary-color);
     transition: color 0.15s;
 }
 
 .chip:hover {
-    border-color: #7B7EF6;
+    border-color: var(--p-primary-color);
 }
 
 .chip-active {
-    background: #7B7EF6;
-    border-color: #7B7EF6;
-    color: white;
+    background: var(--p-primary-color);
+    border-color: var(--p-primary-color);
+    color: var(--p-primary-contrast-color);
+    box-shadow: var(--pb-glow-soft);
 }
 
 .chip-active .pi {
-    color: white;
+    color: var(--p-primary-contrast-color);
+}
+
+.type-row .chip-type {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.include-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.include-label {
+    font-size: 0.85rem;
+    color: var(--p-text-muted-color);
+    margin-right: 0.25rem;
 }
 
 .chip-time {
@@ -462,9 +543,9 @@ defineExpose({ isValid, setTouched })
     gap: 0.5rem;
     padding: 0.45rem 0.95rem;
     border-radius: 999px;
-    background: #7B7EF6;
-    border: 1px solid #7B7EF6;
-    color: white;
+    background: var(--p-primary-color);
+    border: 1px solid var(--p-primary-color);
+    color: var(--p-primary-contrast-color);
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.2;
@@ -534,8 +615,8 @@ defineExpose({ isValid, setTouched })
 }
 
 .p-checkbox.p-checkbox-checked :deep(.p-checkbox-box) {
-    background-color: #7B7EF6;
-    border-color: #7B7EF6;
+    background-color: var(--p-primary-color);
+    border-color: var(--p-primary-color);
 }
 
 .fade-enter-active,

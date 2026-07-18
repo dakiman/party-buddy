@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, provide, readonly } from 'vue'
-import Dialog from 'primevue/dialog'
+import { ref, computed, watch, onMounted, onUnmounted, provide, readonly } from 'vue'
 import Button from 'primevue/button'
 import Stepper from 'primevue/stepper'
 import StepList from 'primevue/steplist'
@@ -35,7 +34,10 @@ const STEP_LABEL: Record<StepKey, string> = {
   review: 'Review',
 }
 
-const visible = ref(false)
+const emit = defineEmits<{
+  cancel: []
+}>()
+
 const timeAndPlaceStep = ref()
 const wizardStore = useWizardStore()
 const toast = useToast()
@@ -45,10 +47,7 @@ const currentStep = ref<StepKey>('timeAndPlace')
 provide('currentWizardStep', readonly(currentStep))
 
 watch(currentStep, () => {
-  nextTick(() => {
-    const stepperEl = document.getElementById('stepper')
-    stepperEl?.closest('.p-dialog-content')?.scrollTo({ top: 0 })
-  })
+  window.scrollTo({ top: 0 })
 })
 
 const isEditMode = computed(() => props.initialEvent !== undefined)
@@ -98,18 +97,17 @@ function seedStoreFromEvent(event: EventResponse): void {
   })
 }
 
-const show = () => {
+onMounted(() => {
   if (props.initialEvent) {
     seedStoreFromEvent(props.initialEvent)
   }
-  visible.value = true
-}
+})
 
-const close = () => {
-  visible.value = false
+// Page-mode lifecycle: leaving the route (finish, cancel, back button)
+// unmounts the wizard — reset the in-progress form there.
+onUnmounted(() => {
   wizardStore.resetForm()
-  currentStep.value = 'timeAndPlace'
-}
+})
 
 const handleFinish = async () => {
   try {
@@ -153,7 +151,6 @@ const handleFinish = async () => {
         detail: 'Your event has been updated successfully.',
         life: 3000,
       })
-      close()
       router.push(`/events/${props.initialEvent.id}`)
     } else {
       // ── Create mode ───────────────────────────────────────────────────
@@ -193,7 +190,6 @@ const handleFinish = async () => {
         detail: 'Your event has been created successfully.',
         life: 3000,
       })
-      close()
       router.push('/')
     }
   } catch (e) {
@@ -208,18 +204,16 @@ const handleFinish = async () => {
   }
 }
 
-defineExpose({
-  show,
-})
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" modal class="event-wizard-dialog" :style="{ width: '90vw', maxWidth: '800px' }" :closable="true" @hide="close">
-    <template #header>
-      <h2 class="wizard-title">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h2>
-    </template>
+  <div class="wizard-page">
+    <div class="wizard-header">
+      <h1 class="wizard-title">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h1>
+      <Button label="Cancel" severity="secondary" text @click="emit('cancel')" />
+    </div>
 
-    <Stepper v-model:value="currentStep" linear id="stepper">
+    <Stepper v-model:value="currentStep" linear id="stepper" class="wizard-card">
       <StepList>
         <Step
           v-for="(key, idx) in activeSteps"
@@ -277,23 +271,75 @@ defineExpose({
           <ReviewStep />
           <div class="wizard-actions">
             <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="() => activateCallback(prevStep('review'))" />
-            <Button label="Finish" severity="success" icon="pi pi-check" :loading="loading" @click="handleFinish" />
+            <Button label="Finish" icon="pi pi-check" class="finish-button" :loading="loading" @click="handleFinish" />
           </div>
         </StepPanel>
       </StepPanels>
     </Stepper>
-  </Dialog>
+  </div>
 </template>
 
 <style scoped>
-/* Dialog chrome (.p-dialog* / .event-wizard-dialog) lives in
-   src/assets/main.css — the dialog teleports to <body>, out of reach of
-   scoped styles (R3). The .review-* rules were duplicates of ReviewStep's
-   own scoped styles and were dropped here. */
+.wizard-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.wizard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
 .wizard-title {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.wizard-card {
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--pb-radius-card);
+  padding: 1.5rem;
+}
+
+.wizard-card :deep(.p-steppanels) {
+  background: transparent;
+  padding: 1.5rem 0 0;
+}
+
+.wizard-card :deep(.p-steplist) {
+  background: transparent;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.wizard-card :deep(.p-steppanel) {
+  background: transparent;
+}
+
+/* Mobile: numbers only for inactive steps — no truncated labels */
+@media screen and (max-width: 640px) {
+  .wizard-card {
+    padding: 1rem;
+  }
+
+  .wizard-card :deep(.p-step:not(.p-step-active) .p-step-title) {
+    display: none;
+  }
+
+  .wizard-card :deep(.p-step) {
+    gap: 0.35rem;
+    padding: 0.25rem;
+  }
+
+  .wizard-card :deep(.p-stepper-separator) {
+    min-width: 0.5rem;
+    margin: 0 0.25rem;
+  }
 }
 
 .wizard-actions {
@@ -302,5 +348,9 @@ defineExpose({
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--p-content-border-color);
+}
+
+.wizard-actions .finish-button {
+  box-shadow: var(--pb-glow);
 }
 </style>

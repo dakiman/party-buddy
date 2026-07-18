@@ -7,18 +7,82 @@
  * teleported DOM, so these rules must stay global.
  */
 
+/* ---- Dark-lounge identity tokens (2026-07 redesign) ---- */
+
+:root {
+  --pb-accent: #8b5cf6;
+  --pb-accent-2: #ec4899; /* gradient/glow use only — never a standalone interactive color */
+  --pb-accent-grad: linear-gradient(120deg, #a78bfa 0%, #8b5cf6 45%, #ec4899 100%);
+  --pb-glow: 0 0 24px rgba(139, 92, 246, 0.35);
+  --pb-glow-soft: 0 0 16px rgba(139, 92, 246, 0.18);
+  --pb-radius-card: 16px;
+}
+
 * {
   font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 520px at 50% -8%, rgba(139, 92, 246, 0.14), transparent 62%),
+    radial-gradient(900px 500px at 100% 110%, rgba(236, 72, 153, 0.07), transparent 55%),
+    var(--p-surface-950);
+  background-attachment: fixed;
+  color: var(--p-text-color);
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Small uppercase-tracked section heading */
+.pb-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--p-text-muted-color);
+}
+
+.pb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--p-content-border-color);
+  color: var(--p-text-muted-color);
+  background: var(--p-surface-900);
+}
+
+.pb-gradient-text {
+  font-weight: inherit; /* the global `*` reset would force 400 */
+  background: var(--pb-accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* ---- Dialog chrome (app-wide look; was duplicated unscoped in
        LoginModal/RegisterModal/MusicStep before R3) ---- */
 
 .p-dialog {
-  background-color: #1E1E1E;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  background-color: var(--p-surface-900);
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.5);
 }
 
 .p-dialog-header {
@@ -46,49 +110,59 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Event wizard dialog deltas (was unscoped in EventWizard before R3) */
-.event-wizard-dialog .p-dialog-header {
-  border-bottom: 1px solid var(--p-content-border-color);
-}
+/* ---- Popup menus (Menu, appendTo="body"): AppHeader user menu +
+       EventDetails overflow menu share one look ---- */
 
-.event-wizard-dialog .p-dialog-content {
-  padding: 15px;
-  color: var(--p-text-color);
-}
-
-/* ---- AppHeader user menu (Menu popup, appendTo="body") ---- */
-
-.user-menu {
-  background-color: #1E1E1E;
+.user-menu,
+.pb-popup-menu {
+  background-color: var(--p-surface-900);
   border: 1px solid var(--p-content-border-color);
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 0.5rem;
   min-width: 200px;
   z-index: 1000;
 }
 
-.user-menu .p-menu-item-link {
+.user-menu .p-menu-item-link,
+.pb-popup-menu .p-menu-item-link {
   padding: 0.75rem 1rem;
   color: var(--p-text-color);
   border-radius: 4px;
 }
 
-.user-menu .p-menu-item-link:hover {
+.user-menu .p-menu-item-link:hover,
+.pb-popup-menu .p-menu-item-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.user-menu .p-menu-item-icon {
+.pb-popup-menu .danger-item .p-menu-item-label,
+.pb-popup-menu .danger-item .p-menu-item-icon {
+  color: var(--p-red-400);
+}
+
+.user-menu .p-menu-item-icon,
+.pb-popup-menu .p-menu-item-icon {
   color: var(--p-text-color);
   margin-right: 0.75rem;
 }
 
-.user-menu .p-menu-item-label {
+.user-menu .p-menu-item-label,
+.pb-popup-menu .p-menu-item-label {
   color: var(--p-text-color);
 }
 
-.user-menu .p-menu-separator {
+.user-menu .p-menu-separator,
+.pb-popup-menu .p-menu-separator {
   border-top: 1px solid var(--p-content-border-color);
   margin: 0.5rem 0;
+}
+
+/* ---- Toast (teleports to <body>) ---- */
+
+.p-toast .p-toast-message {
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* ---- AutoComplete overlay panel (appendTo="body"; was duplicated

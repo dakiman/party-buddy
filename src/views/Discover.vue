@@ -2,6 +2,8 @@
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
 import ToggleButton from 'primevue/togglebutton'
 import Paginator from 'primevue/paginator'
 import Skeleton from 'primevue/skeleton'
@@ -106,7 +108,10 @@ onBeforeUnmount(() => {
     <h1 class="page-title">Discover events</h1>
 
     <div class="controls">
-      <InputText v-model="q" placeholder="Search by name…" fluid />
+      <IconField class="search-field">
+        <InputIcon class="pi pi-search" />
+        <InputText v-model="q" placeholder="Search by name…" fluid />
+      </IconField>
       <ToggleButton v-model="showPast" on-label="Past events" off-label="Past events" />
     </div>
 
@@ -124,7 +129,11 @@ onBeforeUnmount(() => {
       <Button label="Retry" icon="pi pi-refresh" @click="fetchPage" />
     </div>
 
-    <div v-else-if="events.length === 0" class="state">{{ emptyMessage }}</div>
+    <div v-else-if="events.length === 0" class="state">
+      <div class="state-icon"><i class="pi pi-compass" /></div>
+      <h2>Nothing here yet</h2>
+      <p>{{ emptyMessage }}</p>
+    </div>
 
     <div v-else class="card-grid">
       <EventCard v-for="ev in events" :key="ev.id" :event="ev" />
@@ -149,7 +158,7 @@ onBeforeUnmount(() => {
 
 .discover .page-title {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 800;
   margin-bottom: 1.5rem;
   color: var(--p-text-color);
 }
@@ -165,23 +174,66 @@ onBeforeUnmount(() => {
   flex: 1;
 }
 
+.discover .search-field :deep(.p-inputtext) {
+  border-radius: 999px;
+  padding-left: 2.5rem;
+}
+
+.discover .controls :deep(.p-togglebutton) {
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 .discover .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
 
 .discover .state {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem 1rem;
   color: var(--p-text-muted-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.discover .state h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+}
+
+.discover .state p {
+  margin: 0;
+}
+
+.discover .state-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--p-content-border-color);
+  background: var(--p-surface-900);
+  box-shadow: var(--pb-glow-soft);
+  margin-bottom: 0.5rem;
+}
+
+.discover .state-icon i {
+  font-size: 1.5rem;
+  color: var(--p-primary-color);
 }
 
 .discover .skeleton-card {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
-  border-radius: 8px;
+  border-radius: var(--pb-radius-card);
   padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;

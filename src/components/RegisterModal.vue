@@ -166,17 +166,12 @@ defineExpose({
 
 .register-button {
   width: 100%;
-  background-color: #7B7EF6;
-  border: none;
   padding: 0.75rem;
-}
-
-.register-button:hover {
-  background-color: #6366F1;
+  box-shadow: var(--pb-glow);
 }
 
 .p-error {
-  color: #ef4444;
+  color: var(--p-red-400);
   font-size: 0.875rem;
 }
 </style>

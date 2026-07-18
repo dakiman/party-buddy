@@ -62,8 +62,9 @@ function showRegister() {
   <header class="app-header">
     <div class="header-content">
       <div class="logo">
-        <router-link to="/">
-          <img src="@/assets/logo.webp" alt="Logo" class="logo-image" />
+        <router-link to="/" class="logo-link">
+          <img src="@/assets/logo.webp" alt="Party Buddy logo" class="logo-image" />
+          <span class="wordmark">Party&nbsp;<span class="pb-gradient-text">Buddy</span></span>
         </router-link>
       </div>
 
@@ -132,9 +133,39 @@ function showRegister() {
    teleports to <body> (appendTo="body"), out of reach of scoped styles (R3). */
 .app-header {
   width: 100%;
-  background: var(--p-content-background);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--p-surface-950) 78%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--p-content-border-color);
   padding: 0.5rem 1rem;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.wordmark {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--p-text-color);
+  white-space: nowrap;
+}
+
+.wordmark .pb-gradient-text {
+  font-weight: 800;
+}
+
+@media screen and (max-width: 420px) {
+  .wordmark {
+    display: none;
+  }
 }
 
 .header-content {
@@ -163,6 +194,12 @@ function showRegister() {
   display: none;
   align-items: center;
   gap: 0.5rem;
+}
+
+.app-header .user-avatar {
+  background: var(--pb-accent-grad);
+  color: #fff;
+  font-weight: 600;
 }
 
 .app-header .menu-button {
@@ -201,16 +238,32 @@ function showRegister() {
 }
 
 .header-nav .nav-link {
+  position: relative;
   color: var(--p-text-muted-color);
   text-decoration: none;
   font-size: 0.95rem;
+  font-weight: 500;
   padding: 0.4rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-.header-nav .nav-link:hover,
+.header-nav .nav-link:hover {
+  color: var(--p-text-color);
+  background-color: var(--p-content-hover-background);
+}
+
 .header-nav .nav-link.router-link-active {
   color: var(--p-text-color);
-  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.header-nav .nav-link.router-link-active::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--pb-accent-grad);
 }
 </style> 
